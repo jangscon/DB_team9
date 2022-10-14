@@ -1,0 +1,4 @@
+INSERT INTO EMPLOYEE VALUES (1, 'jack', 'apple', 220000 )
+INSERT INTO EMPLOYEE VALUES (2, 'bob', 'banana', 300000 )
+INSERT INTO EMPLOYEE VALUES (3, 'jim', 'grape', 120000 )
+
