@@ -1,10 +1,11 @@
-
+import random
 
 GENRE = [
     "Animation","Beuty","Makeup","Comedy","Critics","Review","DIY","Education",
     "Fashion","Muckbang","Cooking","Gaming","Health", "Fitness","Music","News",
     "Podcaster","Sports","Technology","Vlogger","Science","Lifestyle"
 ]
+GENRE_index = [i for i in range(1,len(GENRE)+1)]
 
 EMAIL = ["naver","gmail","yahoo","outlook","nate","korea","daum"]
 
@@ -210,9 +211,9 @@ def GetRandomGenre(genrenum=1) :
 def GetRandomGenres(chgenremin=1,chgenremax=3,genrenum=1) :
     import random
     if genrenum == 1 :
-        return random.sample(GENRE,random.randrange(chgenremin,chgenremax+1))
+        return random.sample(GENRE_index,random.randrange(chgenremin,chgenremax+1))
     else :
-        return [random.sample(GENRE,random.randrange(chgenremin,chgenremax+1)) for _ in range(genrenum)]
+        return [random.sample(GENRE_index,random.randrange(chgenremin,chgenremax+1)) for _ in range(genrenum)]
 
 def GetChannelName(genrelist , namelist,spacechar=" ") :
     result = []
@@ -285,22 +286,124 @@ def SQLsentenceToFile(result_list , filename="test.sql" ) :
         f.write("COMMIT;")
         f.write("\n")
 
-def USER_tuples(n=50) :
+def USER_tuples(n=50 , FK=True) :
+    print("<USER>")
     user_id = GetRandomMixID(8,8,idnum=n)
     user_password = GetRandomPassword(passnum=n)
-    name = GetRandomNames(namenum=n,nametype="FIRST")
+    name = GetRandomNames(namenum=n,nametype="FIRST",gender="male")
     nickname = GetRandomNickname(nicknum=n )
     email = GetEmailByNames(namelist=name)
 
-    return [pair for pair in zip(user_id , user_password , name , nickname , email)]
+    result = [pair for pair in zip(user_id , user_password , name , nickname , email)]
 
-def CHANNEL_tuples(n=50) :
+    return result , user_id if FK else result
+
+def COMMENT_tuples(user_id_list , channel_id_list , min=0 , max=10 , FK=True) :
+    import random
+    from essential_generators import DocumentGenerator
+
+    print("<COMMENT>")
+    print("\t- comment 작성 중... => 시간이 좀 걸립니다.")
+
+    comment_id = 1
+    result = []
+
+    for i in range(channel_id_list) :
+        r = random.randrange(min, max)
+        if r == 0 :
+            continue
+        rnd_user = random.choice(user_id_list , r)
+        doc = DocumentGenerator()
+        for j in rnd_user :
+            result.append((j,comment_id,doc.sentence(),i))
+            comment_id += 1
+
+    return result , [i for i in range(1,comment_id)] if FK else result
+
+def RATING_tuples(user_id_list , channel_id_list , min=1 , max=30) :
+    import random
+
+    print("<RATING>")
+
+    rating_id = 1
+    result = []
+
+    for i in range(channel_id_list) :
+        r = random.randrange(min, max)
+        if r == 0 :
+            continue
+        rnd_user = random.choice(user_id_list, r)
+        for j in rnd_user :
+            result.append(j ,rating_id , random.randrange(1,11) , i)
+            rating_id += 1
+
+    return result
+
+def YOUTUBER_tuples(n=50 , FK=True) :
+    print("<YOUTUBER>")
+    youtuber_id = [i for i in range(1,n+1)]
+    youtuber_name =  GetRandomNames(namenum=n,nametype="FIRST",gender="female")
+
+    result = [pair for pair in zip(youtuber_id , youtuber_name)]
+
+    return result , youtuber_id if FK else result
+
+def PERFORMER_tuples(n=50 , FK=True) :
+    print("<PERFORMER>")
+    performer_id = [i for i in range(1,n+1)]
+    performer_name = GetRandomNames(namenum=n,nametype="FIRST")
+    performer_char = GetRandomChoice(valuelist=CHARACTER,resultnum=n)
+
+    result = [pair for pair in zip(performer_id , performer_name, performer_char)]
+
+    return result , performer_id if FK else result
+
+def GENRE_tuples(FK=True) :
+    print("<GENRE>")
+    genre_num = GENRE_index
+    genre_name = GENRE
+
+    result = [pair for pair in zip(genre_num , genre_name)]
+
+    return result , genre_num if FK else result
+
+def HAS_tuples(channel_id_list) :
+    print("<HAS>")
+    channel_id = channel_id_list
+    genre_id = GetRandomGenres(genrenum=1)
+
+    result = [pair for pair in zip(channel_id, genre_id)]
+
+def RECOMMENDATION_tuples(user_id_list , comment_id) :
+    print("<RECOMMENDATION>")
+    import random
+    result = []
+    for c in comment_id :
+        num = random.randrange(0, 30)
+        if num != 0 :
+            A = random.sample(user_id_list , num)
+            result.extend([(i,c) for i in A])
+        else :
+            continue
+    return result
+
+def PARTICIPATION_tuples(channel_id_list , performer_id_list) :
+    print("<PARTICIPATION>")
+    result = []
+    for i in channel_id_list :
+        num = random.randrange(1,5)
+        A = random.sample(performer_id_list , num)
+        result.extend([(i,j) for j in A])
+    return result
+
+
+
+# def CHANNEL_tuples(n=50) :
 
 # def COMMENT_tuples(n=50) :
-# def RATING_tuples(n=50) :
-# def YOUTUBER_tuples(n=50) :
-# def PERFORMER_tuples(n=50) :
-# def GENRE_tuples(n=50) :
+
+
+
 
 '''
 테스트 코드
@@ -321,5 +424,10 @@ def test_SQL() :
 
 # test_SQL()
 
+
+from essential_generators import DocumentGenerator
+gen = DocumentGenerator()
+for i in range(10) :
+    print(gen.sentence())
 
 
