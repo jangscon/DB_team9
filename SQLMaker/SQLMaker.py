@@ -325,7 +325,6 @@ def RATING_tuples(user_id_list , channel_id_list , min=1 , max=30) :
 
     print("<RATING>")
 
-    rating_id = 1
     result = []
 
     for i in range(channel_id_list) :
@@ -333,10 +332,7 @@ def RATING_tuples(user_id_list , channel_id_list , min=1 , max=30) :
         if r == 0 :
             continue
         rnd_user = random.choice(user_id_list, r)
-        for j in rnd_user :
-            result.append(j ,rating_id , random.randrange(1,11) , i)
-            rating_id += 1
-
+        result.extend((j , random.randrange(1,11) , i) for j in rnd_user)
     return result
 
 def YOUTUBER_tuples(n=50 , FK=True) :
@@ -399,7 +395,7 @@ def PARTICIPATION_tuples(channel_id_list , performer_id_list) :
 
 # TODO
 # channel -> youtube api 사용해서 구현
-# def CHANNEL_tuples(n=50) :
+def CHANNEL_tuples(n=50) :
 
 
 
@@ -418,7 +414,7 @@ def MakeSQL() :
     genre , genreID = GENRE_tuples(FK=True)
     SQLsentenceToFile(result_list=GetInsertSQLSentence("GENRE", genre))
 
-    # TODO channel 생성 코드 작성 후 수정 
+    # TODO channel 생성 코드 작성 후 수정
     channel , channelID = [] , []
     SQLsentenceToFile(result_list=GetInsertSQLSentence("CHANEL", channel))
 
