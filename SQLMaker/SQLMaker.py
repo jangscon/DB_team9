@@ -1,13 +1,15 @@
 
 
 GENRE = [
-    "Animation","Beuty and Makeup","Comedy","Critics","Review","DIY","Education",
-    "Fashion","Food and Cooking","Gaming","Health and Fitness","Music","News",
+    "Animation","Beuty","Makeup","Comedy","Critics","Review","DIY","Education",
+    "Fashion","Muckbang","Cooking","Gaming","Health", "Fitness","Music","News",
     "Podcaster","Sports","Technology","Vlogger","Science","Lifestyle"
 ]
 
 EMAIL = ["naver","gmail","yahoo","outlook","nate","korea","daum"]
 
+CHARACTER = ["Actor" , "Comedian" , "Animation character" , "Singer" , "Critics" ,
+             "Guest" , "Streamer" , "Animal" , "Virtual Human" , "Athlete", "ProGamer"]
 
 
 '''
@@ -65,7 +67,7 @@ def GetRandomNumnericID(length=8,idnum=1) :
 
         return result
 
-def GetRandomNames(namenum=1 , nametype="FULL") :
+def GetRandomNames(namenum=1 , nametype="FULL",gender="male") :
     import names
 
     if not isinstance(namenum, int):
@@ -198,7 +200,25 @@ def GetEmailByNames(namelist) :
             result.append(f"{i}@{random.choice(EMAIL)}.com")
         return result
 
+def GetRandomGenre(genrenum=1) :
+    import random
+    if genrenum == 1 :
+        return random.choice(GENRE)
+    else :
+        return [random.choice(GENRE) for _ in range(genrenum)]
 
+def GetRandomGenres(chgenremin=1,chgenremax=3,genrenum=1) :
+    import random
+    if genrenum == 1 :
+        return random.sample(GENRE,random.randrange(chgenremin,chgenremax+1))
+    else :
+        return [random.sample(GENRE,random.randrange(chgenremin,chgenremax+1)) for _ in range(genrenum)]
+
+def GetChannelName(genrelist , namelist,spacechar=" ") :
+    result = []
+    for genre , name in zip(genrelist , namelist) :
+        result.append(f"{genre}{spacechar}{name}" if isinstance(genre,str) else f"{genre[0]}{spacechar}{name}")
+    return result
 
 '''
 SQL문 형식 설정 
@@ -258,9 +278,11 @@ def GetInsertSQLSentence(table_name , input_list) :
     return result
 
 def SQLsentenceToFile(result_list , filename="test.sql" ) :
-    with open(filename , 'w') as f :
+    with open(filename , 'a') as f :
         for result in result_list :
             f.write(result+"\n")
+        f.write("\n")
+        f.write("COMMIT;")
         f.write("\n")
 
 def USER_tuples(n=50) :
@@ -272,7 +294,13 @@ def USER_tuples(n=50) :
 
     return [pair for pair in zip(user_id , user_password , name , nickname , email)]
 
+def CHANNEL_tuples(n=50) :
 
+# def COMMENT_tuples(n=50) :
+# def RATING_tuples(n=50) :
+# def YOUTUBER_tuples(n=50) :
+# def PERFORMER_tuples(n=50) :
+# def GENRE_tuples(n=50) :
 
 '''
 테스트 코드
@@ -291,5 +319,7 @@ def test_SQL() :
     print("\n< test.sql 작성 완료했습니다. 확인해보세요 >")
     SQLsentenceToFile(result_list=result_list)
 
-test_SQL()
+# test_SQL()
+
+
 
