@@ -284,7 +284,7 @@ def SQLsentenceToFile(result_list , filename="test.sql" ) :
             f.write(result+"\n")
         f.write("\n")
         f.write("COMMIT;")
-        f.write("\n")
+        f.write("\n\n")
 
 def USER_tuples(n=50 , FK=True) :
     print("<USER>")
@@ -397,13 +397,44 @@ def PARTICIPATION_tuples(channel_id_list , performer_id_list) :
     return result
 
 
-
+# TODO
+# channel -> youtube api 사용해서 구현
 # def CHANNEL_tuples(n=50) :
 
-# def COMMENT_tuples(n=50) :
 
 
+def MakeSQL() :
+    print("데이터 생성 중입니다...")
 
+    user , userID = USER_tuples(50,FK=True)
+    SQLsentenceToFile(result_list=GetInsertSQLSentence("USER" , user))
+
+    youtuber , youtuberID = YOUTUBER_tuples(50,FK=True)
+    SQLsentenceToFile(result_list=GetInsertSQLSentence("YOUTUBER", youtuber))
+
+    performer , performerID = PERFORMER_tuples(50 , FK=True)
+    SQLsentenceToFile(result_list=GetInsertSQLSentence("PERFORMER", performer))
+
+    genre , genreID = GENRE_tuples(FK=True)
+    SQLsentenceToFile(result_list=GetInsertSQLSentence("GENRE", genre))
+
+    # TODO channel 생성 코드 작성 후 수정 
+    channel , channelID = [] , []
+    SQLsentenceToFile(result_list=GetInsertSQLSentence("CHANEL", channel))
+
+    comment , commentID = COMMENT_tuples(userID,channelID,min=0,max=10,FK=True)
+    SQLsentenceToFile(result_list=GetInsertSQLSentence("COMMENT", comment))
+
+    participation = PARTICIPATION_tuples(channelID , performerID)
+    SQLsentenceToFile(result_list=GetInsertSQLSentence("PARTICIPATION", participation))
+
+    recommendation = RECOMMENDATION_tuples(userID,commentID)
+    SQLsentenceToFile(result_list=GetInsertSQLSentence("RECOMMENDATION", recommendation))
+
+    has = HAS_tuples(channelID)
+    SQLsentenceToFile(result_list=GetInsertSQLSentence("HAS", has))
+
+    print("< test.sql 작성 완료했습니다. 확인해보세요 >")
 
 '''
 테스트 코드
@@ -422,12 +453,11 @@ def test_SQL() :
     print("\n< test.sql 작성 완료했습니다. 확인해보세요 >")
     SQLsentenceToFile(result_list=result_list)
 
-# test_SQL()
 
 
-from essential_generators import DocumentGenerator
-gen = DocumentGenerator()
-for i in range(10) :
-    print(gen.sentence())
+def main() :
+    MakeSQL()
 
+if __name__ == "__main__" :
+    main()
 
