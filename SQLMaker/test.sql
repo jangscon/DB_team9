@@ -1,5 +1,123 @@
+ CREATE TABLE USER (
+  use_id        VARCHAR(20)     NOT NULL,
+  user_password VARCHAR(20)     NOT NULL,
+  name          VARCHAR(15)     NOT NULL,
+  nickname      varchar(15)     NOT NULL,
+  email         varchar(40)     NOT NULL,
 
+  CONSTRAINT USRPK PRIMARY KEY (use_id)
+);
+COMMIT;
 
+CREATE TABLE YOUTUBER (
+  youtuber_id   number          NOT NULL,
+  name          varchar(15)     NOT NULL,
+
+  CONSTRAINT YTBPK PRIMARY KEY (youtuber_id)
+);
+COMMIT;
+
+CREATE TABLE PERFORMER (
+  performer_id  number          NOT NULL,
+  name          varchar(15)     NOT NULL,
+  character     varchar(15)     NOT NULL,
+
+  CONSTRAINT PFMPK PRIMARY KEY (performer_id)
+);
+COMMIT;
+
+CREATE TABLE GENRE (
+  genre_num     number          NOT NULL,
+  genre_name    varchar(15)     NOT NULL,
+
+  CONSTRAINT GNRPK PRIMARY KEY (genre_num)
+);
+COMMIT;
+
+CREATE TABLE CHANNEL (
+  channel_id      char(24)      NOT NULL,
+  channel_name    varchar(40)   NOT NULL,
+  description     varchar(400)
+  total_views     number        NOT NULL,
+  subscriber_num  number        NOT NULL,
+  youtuber_id     number        NOT NULL,
+
+  CONSTRAINT CHNNLPK PRIMARY KEY (channel_id),
+  CONSTRAINT CHNNLFK FOREIGN KEY (youtuber_id)
+        REFERENCES YOUTUBER(youtuber_id)
+		ON DELETE CASCADE
+);
+COMMIT;
+
+CREATE TABLE HAS (
+  channel_id    char(24)      NOT NULL,
+  genre_num     number        NOT NULL,
+
+  CONSTRAINT HASCHFK FOREIGN KEY (channel_id)
+        REFERENCES YOUTUBER(youtuber_id)
+		ON DELETE CASCADE,
+  CONSTRAINT HASGNRFK FOREIGN KEY (genre_num)
+        REFERENCES GENRE(genre_num)
+  	ON DELETE CASCADE
+);
+COMMIT;
+
+CREATE TABLE COMMENT (
+  user_id       varchar(20)   NOT NULL,
+  comment_id    number        NOT NULL,
+  comment       varchar(400)  NOT NULL,
+  channel_id    char(24)      NOT NULL,
+
+  CONSTRAINT CMMTPK PRIMARY KEY (comment_id),
+  CONSTRAINT CMMTUSRFK FOREIGN KEY (user_id)
+        REFERENCES USER(user_id)
+  	ON DELETE CASCADE,
+  CONSTRAINT CMMTCHHNLFK FOREIGN KEY (channel_id)
+        REFERENCES CHANNEL(channel_id)
+    ON DELETE CASCADE
+);
+COMMIT;
+
+CREATE TABLE PARTICIPATION (
+  channel_id      char(24)    NOT NULL,
+  performer_id    number      NOT NULL,
+
+  CONSTRAINT PTCCHFK FOREIGN KEY (channel_id)
+        REFERENCES CHANNEL(channel_id)
+  	ON DELETE CASCADE,
+  CONSTRAINT PTCPFMFK FOREIGN KEY (performer_id)
+        REFERENCES PERFORMER(performer_id)
+    ON DELETE CASCADE
+);
+COMMIT;
+
+CREATE TABLE RECOMMENDATION (
+  user_id       varchar(20)   NOT NULL,
+  comment_id    number        NOT NULL,
+
+  CONSTRAINT RCMDUSRFK FOREIGN KEY (use_id)
+        REFERENCES USER(user_id)
+  	ON DELETE CASCADE,
+  CONSTRAINT RCMDCMMTFK FOREIGN KEY (comment_id)
+        REFERENCES COMMENT(comment_id)
+    ON DELETE CASCADE
+);
+COMMIT;
+
+CREATE TABLE RATING (
+  user_id       varchar(20)   NOT NULL,
+  channel_id    char(24)      NOT NULL,
+  rating        number,
+
+  CONSTRAINT RCMDUSRFK FOREIGN KEY (use_id)
+        REFERENCES USER(user_id)
+  	ON DELETE CASCADE,
+  CONSTRAINT RCMDCMMTFK FOREIGN KEY (channel_id)
+        REFERENCES CHANNEL(channel_id)
+    ON DELETE CASCADE
+
+);
+COMMIT;
 
 INSERT INTO USER VALUES ('LMPYOdro85396562', 'GCSl3yYFIqKEvq2x3', 'Brian', 'eagerPear1', 'Brian@nate.com' )
 INSERT INTO USER VALUES ('EncdmxYg47215749', 'EOpD5iuYBg5C', 'Phillip', 'solemnLlama5', 'Phillip@yahoo.com' )
