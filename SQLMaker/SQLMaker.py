@@ -408,9 +408,9 @@ def HAS_tuples(channel_id_list):
     channel_id = channel_id_list
     genre_id = GetRandomGenres(genrenum=len(channel_id))
     result = []
-    for pair in zip(channel_id, genre_id) :
-        for i in pair[1] :
-            result.append((pair[0],i))
+    for pair in zip(channel_id, genre_id):
+        for i in pair[1]:
+            result.append((pair[0], i))
     print(len(result))
     return result
 
@@ -459,8 +459,9 @@ def CHANNEL_tuples(youtuber_id_list, filename="input.txt", FK=True):
             part="snippet",
             maxResults=1
         ).execute()
-        id = response["items"][0]["snippet"]["channelId"]
-        description = response["items"][0]["snippet"]["description"]
+        id = response["items"][0]["snippet"]["channelId"].replace("\'", "\'\'")
+        title = title.replace("\'", "\'\'")
+        description = response["items"][0]["snippet"]["description"].replace("\'", "\'\'")
         return id, title, description
 
     def get_statistics(channel_id):
@@ -478,20 +479,21 @@ def CHANNEL_tuples(youtuber_id_list, filename="input.txt", FK=True):
 
     f = open(filename, "r", encoding="utf-8")
     lines = f.readlines()
-    youtuber_id = 0
+    index = 0
 
     for line in lines:
         title, genre_id = line.strip().split(",")
         id, title, description = get_snippet(title)
         view_count, subscriber_count = get_statistics(id)
-        if youtuber_id < len(youtuber_id_list):
-            youtuber_id += 1
+        if index < len(youtuber_id_list):
+            youtuber_id = youtuber_id_list[index]
+            index += 1
         else:
-            youtuber_id = random.randrange(1, len(youtuber_id_list) + 1)
-        channel_tuple_list.append(
-            [id, title, description, view_count, subscriber_count, youtuber_id])
-        has_tuple_list.append([id, int(genre_id)])
-        channel_id_list.append(id)
+            youtuber_id = random.choice(youtuber_id_list)
+        channel_tuple_list.append([str(id), str(title), str(description), int(
+            view_count), int(subscriber_count), int(youtuber_id)])
+        has_tuple_list.append([str(id), int(genre_id)])
+        channel_id_list.append(str(id))
 
     f.close()
     return (channel_tuple_list, has_tuple_list, channel_id_list) if FK else (channel_tuple_list, has_tuple_list)
@@ -535,99 +537,114 @@ def MakeSQL():
     print("< test.sql 작성 완료했습니다. 확인해보세요 >")
 
 
+def MakeSQL_channel():
+    print("데이터 생성 중입니다...")
+
+    youtuber, youtuberID = YOUTUBER_tuples(50, FK=True)
+    SQLsentenceToFile(result_list=GetInsertSQLSentence("YOUTUBER", youtuber))
+
+    channel, has, channelID = CHANNEL_tuples(
+        youtuberID, filename="input.txt", FK=True)
+    SQLsentenceToFile(result_list=GetInsertSQLSentence("CHANNEL", channel))
+    SQLsentenceToFile(result_list=GetInsertSQLSentence("HAS", has))
+
+    print("< test.sql 작성 완료했습니다. 확인해보세요 >")
+
+
 '''
 테스트 코드
 '''
 ytb_ids = [
-'UCRuSxVu4iqTK5kCh90ntAgA',
-'UChbE5OZQ6dRHECsX0tEPEZQ',
-'UCB8Fets2QTgay4SrwyHOzpA',
-'UCszFjh7CEfwDb7UUGb4RzCQ',
-'UCIZ5rCTYJ0s16FgT7OetVEQ',
-'UCzPhd4orXg5TWhM1u2RV-cw',
-'UCkOWueVolZTPOMaa5ZIYrxw',
-'UCoJ_56-OMSe_jrp42ClhODA',
-'UCnFFOjljp1_sacTz7PfIIyg',
-'UC9kmlDcqksaOnCkC_qzGacA',
-'UCuZu8NrpBG4WPXRi-hPBl-A',
-'UCnekLiljel-Px4ClMC7b3mg',
-'UC1B6SalAoiJD7eHfMUA9QrA',
-'UCGX5sP4ehBkihHwt5bs5wvg',
-'UC5xLohcPE65Y-U62X6snmRQ',
-'UCYtjW8dGkaeHwrMiB01Xa_Q',
-'UClErHbdZKUnD1NyIUeQWvuQ',
-'UCsJ6RuBiTVWRX156FVbeaGg',
-'UCgheNMc3gGHLsT-RISdCzDQ',
-'UCF8AeLlUbEpKju6v1H6p8Eg',
-'UC79hJz6y1EEiIkwfHOuWC4w',
-'UCaHGOzOyeYzLQeKsVkfLEGA',
-'UCMguxwveCsLVpyKrLz-EFTg',
-'UCpCiIDf9UrfRqte55FHWlYQ',
-'UCd4FmcWIVdWAy0-Q8OJBloQ',
-'UCPBvwGeynLRFTgjqnlKyotw',
-'UCp94pzrtA5wPyZazbDq0CXA',
-'UCuPeQ50gyXAl_70p0UT7WAQ',
-'UCc8-vc45vK1-kUFZvii7s5g',
-'UCFCtZJTuJhE18k8IXwmXTYQ',
-'UC7A6GVOKGkD2CeUPW_l41Bg',
-'UCcYk_KPZZMLv_bcaSAWSSxA',
-'UCbOwqHbQf0uspeRe7lY8e6Q',
-'UCcSepD5GRKpskptBW2TSKGg',
-'UCw-kXdzxMdMdLNI0ZlFFbmA',
-'UC8a6z7i9qypp9PqJ_0HhBrw',
-'UCPKNKldggioffXPkSmjs5lQ',
-'UCfpaSruWW3S4dibonKXENjA',
-'UCA6KBBX8cLwYZNepxlE_7SA',
-'UC-i2ywiuvjvpTy2zW-tXfkw',
-'UCZTavrg2A43lQMWxiK3yu7g',
-'UCL01un1rw1MU3wj7-oEELQQ',
-'UCr5Kww9xqzPmSJTHyXl58YQ',
-'UC0htUSwcxfSGNfK_5Q28JkA',
-'UCt15X5eHLwyP8PpNtQTkuDQ',
-'UCD2YO_A_PVMgMDN9jpRrpVA',
-'UCJpAwvQaZyCI5spAz7tipGA',
-'UCDBAVzfX3yZ1hah0FHnOoaA',
-'UCuFGPhfJlIngZaC2BjLaJdQ',
-'UCF9vbHlZpz7FbOAky3fnYxw',
-'UCVfLNEch9YxD4tX1L-crkMQ',
-'UCnLrunxy9Ex0JWvm9HHa71w',
-'UCYJDUekoQz0-bo8al1diLWQ',
-'UCoe-0EVDJnjlSoPK8ygcGwQ',
-'UCdtRAcd3L_UpV4tMXCw63NQ',
-'UCQ4eZwsMew7ZaV_HKXnQLGg',
-'UCe52oeb7Xv_KaJsEzcKXJJg',
-'UCeLPm9yH_a_QH8n6445G-Ow',
-'UCS_hnpJLQTvBkqALgapi_4g',
-'UCepUWUpH45hRTi-QePdq1Bg',
-'UCcQTRi69dsVYHN3exePtZ1A',
-'UCkinYTS9IHqOEwR1Sze2JTw',
-'UCsU-I-vHLiaMfV_ceaYz5rQ',
-'UChlgI3UHCOnwUGzWzbJ3H5w',
-'UCq0pVPNYdDWQk1iTS4jTk2w',
-'UCG1yCJ0i5iAH1lixElahYUw',
-'UCAmff0euQRf6RwVlbB8PLMw',
-'UCwRljhjVWtLqAKbsWGPU_OA',
-'UCnXNukjRxXGD8aeZGRV-lYg',
-'UC2emKV0kcPDKNl9EtDm4Ubg',
-'UCdTDdygpZKdDew2s1s419iw',
-'UCtm_QoN2SIxwCE-59shX7Qg',
-'UCdUcjkyZtf-1WJyPPiETF1g',
-'UCFX6adXoyQKxft933NB3rmA',
-'UC_0oo0GPlDUU88ubLDnJkSQ',
-'UCJiv3w22pf4Cgpwxo70MbhQ',
-'UC3SyT4_WLHzN7JmHQwKQZww',
-'UCoQy2wS5aiKCk-rUXiLS-vQ',
-'UC8TxOmxwC8QpHRZra7sOFig',
-'UCj-durTg1W7uWsB8oq0u7kA',
-'UC7F6UDq3gykPZHWRhrj_BDw',
-'UCMc4EmuDxnHPc6pgGW-QWvQ',
-'UCrBpV_pG2kyMMEHCMTNzjAQ',
-'UCIk1-yPCTnFuzfgu4gyfWqw',
-'UCw8ZhLPdQ0u_Y-TLKd61hGA',
-'UC3LIEPioeH0CmVCmCn4JS1g',
-'UC2KEmFk5uE9bYvxoHuUFH5g',
-'UC2jHhn8GMouSKUiauOsiR3w'
+    'UCRuSxVu4iqTK5kCh90ntAgA',
+    'UChbE5OZQ6dRHECsX0tEPEZQ',
+    'UCB8Fets2QTgay4SrwyHOzpA',
+    'UCszFjh7CEfwDb7UUGb4RzCQ',
+    'UCIZ5rCTYJ0s16FgT7OetVEQ',
+    'UCzPhd4orXg5TWhM1u2RV-cw',
+    'UCkOWueVolZTPOMaa5ZIYrxw',
+    'UCoJ_56-OMSe_jrp42ClhODA',
+    'UCnFFOjljp1_sacTz7PfIIyg',
+    'UC9kmlDcqksaOnCkC_qzGacA',
+    'UCuZu8NrpBG4WPXRi-hPBl-A',
+    'UCnekLiljel-Px4ClMC7b3mg',
+    'UC1B6SalAoiJD7eHfMUA9QrA',
+    'UCGX5sP4ehBkihHwt5bs5wvg',
+    'UC5xLohcPE65Y-U62X6snmRQ',
+    'UCYtjW8dGkaeHwrMiB01Xa_Q',
+    'UClErHbdZKUnD1NyIUeQWvuQ',
+    'UCsJ6RuBiTVWRX156FVbeaGg',
+    'UCgheNMc3gGHLsT-RISdCzDQ',
+    'UCF8AeLlUbEpKju6v1H6p8Eg',
+    'UC79hJz6y1EEiIkwfHOuWC4w',
+    'UCaHGOzOyeYzLQeKsVkfLEGA',
+    'UCMguxwveCsLVpyKrLz-EFTg',
+    'UCpCiIDf9UrfRqte55FHWlYQ',
+    'UCd4FmcWIVdWAy0-Q8OJBloQ',
+    'UCPBvwGeynLRFTgjqnlKyotw',
+    'UCp94pzrtA5wPyZazbDq0CXA',
+    'UCuPeQ50gyXAl_70p0UT7WAQ',
+    'UCc8-vc45vK1-kUFZvii7s5g',
+    'UCFCtZJTuJhE18k8IXwmXTYQ',
+    'UC7A6GVOKGkD2CeUPW_l41Bg',
+    'UCcYk_KPZZMLv_bcaSAWSSxA',
+    'UCbOwqHbQf0uspeRe7lY8e6Q',
+    'UCcSepD5GRKpskptBW2TSKGg',
+    'UCw-kXdzxMdMdLNI0ZlFFbmA',
+    'UC8a6z7i9qypp9PqJ_0HhBrw',
+    'UCPKNKldggioffXPkSmjs5lQ',
+    'UCfpaSruWW3S4dibonKXENjA',
+    'UCA6KBBX8cLwYZNepxlE_7SA',
+    'UC-i2ywiuvjvpTy2zW-tXfkw',
+    'UCZTavrg2A43lQMWxiK3yu7g',
+    'UCL01un1rw1MU3wj7-oEELQQ',
+    'UCr5Kww9xqzPmSJTHyXl58YQ',
+    'UC0htUSwcxfSGNfK_5Q28JkA',
+    'UCt15X5eHLwyP8PpNtQTkuDQ',
+    'UCD2YO_A_PVMgMDN9jpRrpVA',
+    'UCJpAwvQaZyCI5spAz7tipGA',
+    'UCDBAVzfX3yZ1hah0FHnOoaA',
+    'UCuFGPhfJlIngZaC2BjLaJdQ',
+    'UCF9vbHlZpz7FbOAky3fnYxw',
+    'UCVfLNEch9YxD4tX1L-crkMQ',
+    'UCnLrunxy9Ex0JWvm9HHa71w',
+    'UCYJDUekoQz0-bo8al1diLWQ',
+    'UCoe-0EVDJnjlSoPK8ygcGwQ',
+    'UCdtRAcd3L_UpV4tMXCw63NQ',
+    'UCQ4eZwsMew7ZaV_HKXnQLGg',
+    'UCe52oeb7Xv_KaJsEzcKXJJg',
+    'UCeLPm9yH_a_QH8n6445G-Ow',
+    'UCS_hnpJLQTvBkqALgapi_4g',
+    'UCepUWUpH45hRTi-QePdq1Bg',
+    'UCcQTRi69dsVYHN3exePtZ1A',
+    'UCkinYTS9IHqOEwR1Sze2JTw',
+    'UCsU-I-vHLiaMfV_ceaYz5rQ',
+    'UChlgI3UHCOnwUGzWzbJ3H5w',
+    'UCq0pVPNYdDWQk1iTS4jTk2w',
+    'UCG1yCJ0i5iAH1lixElahYUw',
+    'UCAmff0euQRf6RwVlbB8PLMw',
+    'UCwRljhjVWtLqAKbsWGPU_OA',
+    'UCnXNukjRxXGD8aeZGRV-lYg',
+    'UC2emKV0kcPDKNl9EtDm4Ubg',
+    'UCdTDdygpZKdDew2s1s419iw',
+    'UCtm_QoN2SIxwCE-59shX7Qg',
+    'UCdUcjkyZtf-1WJyPPiETF1g',
+    'UCFX6adXoyQKxft933NB3rmA',
+    'UC_0oo0GPlDUU88ubLDnJkSQ',
+    'UCJiv3w22pf4Cgpwxo70MbhQ',
+    'UC3SyT4_WLHzN7JmHQwKQZww',
+    'UCoQy2wS5aiKCk-rUXiLS-vQ',
+    'UC8TxOmxwC8QpHRZra7sOFig',
+    'UCj-durTg1W7uWsB8oq0u7kA',
+    'UC7F6UDq3gykPZHWRhrj_BDw',
+    'UCMc4EmuDxnHPc6pgGW-QWvQ',
+    'UCrBpV_pG2kyMMEHCMTNzjAQ',
+    'UCIk1-yPCTnFuzfgu4gyfWqw',
+    'UCw8ZhLPdQ0u_Y-TLKd61hGA',
+    'UC3LIEPioeH0CmVCmCn4JS1g',
+    'UC2KEmFk5uE9bYvxoHuUFH5g',
+    'UC2jHhn8GMouSKUiauOsiR3w'
 ]
+
 
 def test_SQL():
     input = USER_tuples()
@@ -646,10 +663,11 @@ def test_SQL():
 
 def main():
     # MakeSQL()
-    A= HAS_tuples(ytb_ids)
-    B = GetInsertSQLSentence("HAS",A)
-    for i in B :
-        print(i)
+    # A = HAS_tuples(ytb_ids)
+    # B = GetInsertSQLSentence("HAS", A)
+    # for i in B:
+    #     print(i)
+    MakeSQL_channel()
 
 
 if __name__ == "__main__":
