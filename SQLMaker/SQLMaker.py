@@ -5,7 +5,8 @@ GENRE = [
     "Fashion", "Muckbang", "Cooking", "Gaming", "Health", "Fitness", "Music", "News",
     "Podcaster", "Sports", "Technology", "Vlogger", "Science", "Dance"
 ]
-GENRE_index = [i for i in range(1, len(GENRE)+1)]
+
+GENRE_INDEX = [i for i in range(1, len(GENRE) + 1)]
 
 EMAIL = ["naver", "gmail", "yahoo", "outlook", "nate", "korea", "daum"]
 
@@ -16,6 +17,20 @@ CHARACTER = ["Actor", "Comedian", "Animation character", "Singer", "Critics",
 '''
 INSERT 할 value들 생성 (랜덤)
 '''
+
+
+def writeKeyListToFile(path, list):
+    import pickle
+    with open(path, 'wb') as f:
+        pickle.dump(list, f)
+
+
+def readKeyListFromFile(path):
+    ret = None
+    import pickle
+    with open(path, 'rb') as f:
+        ret = pickle.load(f)
+    return ret
 
 
 def GetRandomInt(min=10000, max=5000000, sbnum=1):
@@ -231,9 +246,9 @@ def GetRandomGenre(genrenum=1):
 def GetRandomGenres(chgenremin=1, chgenremax=3, genrenum=1):
     import random
     if genrenum == 1:
-        return random.sample(GENRE_index, random.randrange(chgenremin, chgenremax+1))
+        return random.sample(GENRE_INDEX, random.randrange(chgenremin, chgenremax+1))
     else:
-        return [random.sample(GENRE_index, random.randrange(chgenremin, chgenremax+1)) for _ in range(genrenum)]
+        return [random.sample(GENRE_INDEX, random.randrange(chgenremin, chgenremax+1)) for _ in range(genrenum)]
 
 
 def GetChannelName(genrelist, namelist, spacechar=" "):
@@ -303,13 +318,13 @@ def GetInsertSQLSentence(table_name, input_list):
 
     for i in input_list:
         result.append(
-            f"INSERT INTO {table_name.upper()} VALUES ({GetValuesToString(i)})")
+            f"INSERT INTO {table_name.lower()} VALUES ({GetValuesToString(i)});")
 
     return result
 
 
 def SQLsentenceToFile(result_list, filename="test.sql"):
-    with open(filename, 'a', encoding="utf-8") as f:
+    with open(filename, 'w', encoding="utf-8") as f:
         for result in result_list:
             f.write(result+"\n")
         f.write("\n")
@@ -321,7 +336,7 @@ def USER_tuples(n=50, FK=True):
     print("<USER>")
     user_id = GetRandomMixID(8, 8, idnum=n)
     user_password = GetRandomPassword(passnum=n)
-    name = GetRandomNames(namenum=n, nametype="FIRST", gender="male")
+    name = GetRandomNames(namenum=n, nametype="FIRST")
     nickname = GetRandomNickname(nicknum=n)
     email = GetEmailByNames(namelist=name)
 
@@ -348,11 +363,17 @@ def COMMENT_tuples(user_id_list, channel_id_list, min=0, max=10, FK=True):
         random_user_id_list = random.sample(user_id_list, r)
         doc = DocumentGenerator()
         for j in random_user_id_list:
-            result.append((j, comment_id, doc.sentence(), channel_id))
+            result.append((j, comment_id,
+            doc.sentence().
+            replace('\'', '\'\'').
+            replace('?', '\' || chr(63) || \'').
+            replace('&', '\' || chr(38) || \'').
+            replace('_', '\' || chr(95) || \'').
+            replace('%', '\' || chr(37) || \''),
+            channel_id))
             comment_id += 1
 
     return result, [i for i in range(1, comment_id)] if FK else result
-
 
 def RATING_tuples(user_id_list, channel_id_list, min=1, max=30):
     import random
@@ -374,18 +395,27 @@ def YOUTUBER_tuples(n=50, FK=True):
     print("<YOUTUBER>")
     youtuber_id = [i for i in range(1, n+1)]
     youtuber_name = GetRandomNames(
-        namenum=n, nametype="FIRST", gender="female")
+        namenum=n, nametype="FIRST")
 
     result = [pair for pair in zip(youtuber_id, youtuber_name)]
 
     return result, youtuber_id if FK else result
 
 
+
 def PERFORMER_tuples(n=50, FK=True):
     print("<PERFORMER>")
     performer_id = [i for i in range(1, n+1)]
     performer_name = GetRandomNames(namenum=n, nametype="FIRST")
-    performer_char = GetRandomChoice(valuelist=CHARACTER, resultnum=n)
+    index = 0
+    index_list = []
+    for _ in range(len(performer_id)):
+        if index < len(CHARACTER):
+            index_list.append(index)
+            index += 1
+        else:
+            index_list.append(random.choice(range(len(CHARACTER))))    
+        performer_char = [CHARACTER[i] for i in index_list]
 
     result = [pair for pair in zip(
         performer_id, performer_name, performer_char)]
@@ -395,7 +425,7 @@ def PERFORMER_tuples(n=50, FK=True):
 
 def GENRE_tuples(FK=True):
     print("<GENRE>")
-    genre_num = GENRE_index
+    genre_num = GENRE_INDEX
     genre_name = GENRE
 
     result = [pair for pair in zip(genre_num, genre_name)]
@@ -420,7 +450,7 @@ def RECOMMENDATION_tuples(user_id_list, comment_id):
     import random
     result = []
     for c in comment_id:
-        num = random.randrange(0, 30)
+        num = random.randrange(0, 10)
         if num != 0:
             A = random.sample(user_id_list, num)
             result.extend([(i, c) for i in A])
@@ -428,16 +458,32 @@ def RECOMMENDATION_tuples(user_id_list, comment_id):
             continue
     return result
 
-
-def PARTICIPATION_tuples(channel_id_list, performer_id_list):
-    print("<PARTICIPATION>")
+def rating_tuples(user_id_list, channel_id_list):
+    import random
     result = []
-    for i in channel_id_list:
-        num = random.randrange(1, 5)
-        A = random.sample(performer_id_list, num)
-        result.extend([(i, j) for j in A])
+    for c in channel_id_list:
+        num = random.randrange(0, 10)
+        if num != 0:
+            ul = random.sample(user_id_list, num)
+            result.extend([(u, c, random.randrange(1, 11)) for u in ul])
+        else:
+            continue
     return result
 
+rating = rating_tuples(readKeyListFromFile('./userid.txt'), readKeyListFromFile('./channelid.txt'))
+SQLsentenceToFile(result_list=GetInsertSQLSentence(
+    "rating", rating))
+
+
+def PARTICIPATION_tuples(channel_id_list, performer_id_list):
+    import random
+    print("<PARTICIPATION>")
+    result = []
+    for p in performer_id_list:
+        chnls = random.sample(channel_id_list, random.randrange(1, 4))
+        for c in chnls:
+            result.append([c, p])
+    return result
 
 def CHANNEL_tuples(youtuber_id_list, filename="input.txt", FK=True):
     print("<CHANNEL>")
@@ -461,7 +507,8 @@ def CHANNEL_tuples(youtuber_id_list, filename="input.txt", FK=True):
         ).execute()
         id = response["items"][0]["snippet"]["channelId"].replace("\'", "\'\'")
         title = title.replace("\'", "\'\'")
-        description = response["items"][0]["snippet"]["description"].replace("\'", "\'\'")
+        description = response["items"][0]["snippet"]["description"].replace(
+            "\'", "\'\'")
         return id, title, description
 
     def get_statistics(channel_id):
@@ -497,7 +544,6 @@ def CHANNEL_tuples(youtuber_id_list, filename="input.txt", FK=True):
 
     f.close()
     return (channel_tuple_list, has_tuple_list, channel_id_list) if FK else (channel_tuple_list, has_tuple_list)
-
 
 def MakeSQL():
     print("데이터 생성 중입니다...")
@@ -661,14 +707,5 @@ def test_SQL():
     SQLsentenceToFile(result_list=result_list)
 
 
-def main():
-    # MakeSQL()
-    # A = HAS_tuples(ytb_ids)
-    # B = GetInsertSQLSentence("HAS", A)
-    # for i in B:
-    #     print(i)
-    MakeSQL_channel()
-
-
 if __name__ == "__main__":
-    main()
+    pass
