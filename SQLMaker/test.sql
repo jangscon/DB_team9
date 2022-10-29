@@ -1,174 +1,147 @@
- CREATE TABLE USER (
-  use_id        VARCHAR(20)     NOT NULL,
-  user_password VARCHAR(20)     NOT NULL,
-  name          VARCHAR(15)     NOT NULL,
-  nickname      varchar(15)     NOT NULL,
-  email         varchar(40)     NOT NULL,
-
-  CONSTRAINT USRPK PRIMARY KEY (use_id)
+CREATE TABLE customer (
+    customer_id     VARCHAR(20)     NOT NULL,
+    password        VARCHAR(20)     NOT NULL,
+    name            VARCHAR(15)     NOT NULL,
+    nickname        VARCHAR(15)     NOT NULL,
+    email           VARCHAR(40)     NOT NULL,
+    
+    PRIMARY KEY (customer_id)
 );
+
+CREATE TABLE youtuber (
+    youtuber_id     NUMBER          NOT NULL,
+    name            VARCHAR(15)     NOT NULL,
+    
+    PRIMARY KEY (youtuber_id)
+);
+
+CREATE TABLE performer (
+    performer_id    NUMBER          NOT NULL,
+    name            VARCHAR(15)     NOT NULL,
+    character       VARCHAR(20)     NOT NULL,
+    
+    PRIMARY KEY (performer_id)
+);
+
+CREATE TABLE genre (
+    genre_num       NUMBER          NOT NULL,
+    genre_name      VARCHAR(15)     NOT NULL,
+    
+    PRIMARY KEY (genre_num)
+);
+
+CREATE TABLE channel (
+    channel_id      CHAR(24)        NOT NULL,
+    channel_name    VARCHAR(40)     NOT NULL,
+    description     VARCHAR(400),
+    total_views     NUMBER          NOT NULL,
+    subscriber_num  NUMBER          NOT NULL,
+    youtuber_id     NUMBER          NOT NULL,
+    
+    PRIMARY KEY (channel_id),
+    FOREIGN KEY (youtuber_id) REFERENCES youtuber ON DELETE CASCADE
+);
+
+CREATE TABLE has (
+    channel_id      CHAR(24)        NOT NULL,
+    genre_num       NUMBER          NOT NULL,
+    
+    PRIMARY KEY (channel_id, genre_num),
+    FOREIGN KEY (channel_id) REFERENCES channel ON DELETE CASCADE,
+    FOREIGN KEY (genre_num) REFERENCES genre ON DELETE CASCADE
+);
+
+CREATE TABLE participation (
+    channel_id      CHAR(24)        NOT NULL,
+    performer_id    NUMBER          NOT NULL,
+    
+    PRIMARY KEY (channel_id, performer_id),
+    FOREIGN KEY (channel_id) REFERENCES channel ON DELETE CASCADE,
+    FOREIGN KEY (performer_id) REFERENCES performer ON DELETE CASCADE
+);
+
+CREATE TABLE comments (
+    customer_id     VARCHAR(20)     NOT NULL,
+    comment_id      NUMBER          NOT NULL,
+    message         VARCHAR(400)    NOT NULL,
+    channel_id      CHAR(24)        NOT NULL,
+    
+    PRIMARY KEY (comment_id),
+    FOREIGN KEY (customer_id) REFERENCES customer ON DELETE CASCADE,
+    FOREIGN KEY (channel_id) REFERENCES channel ON DELETE CASCADE
+);
+
+CREATE TABLE recommendation (
+    customer_id     VARCHAR(20)     NOT NULL,
+    comment_id      NUMBER          NOT NULL,
+    
+    PRIMARY KEY (customer_id, comment_id),
+    FOREIGN KEY (customer_id) REFERENCES customer ON DELETE CASCADE,
+    FOREIGN KEY (comment_id) REFERENCES comments ON DELETE CASCADE
+);
+
+CREATE TABLE rating (
+    customer_id     VARCHAR(20)     NOT NULL,
+    channel_id      CHAR(24)        NOT NULL,
+    rating          NUMBER          NOT NULL,
+    
+    PRIMARY KEY (customer_id, channel_id, rating),
+    FOREIGN KEY (customer_id) REFERENCES customer ON DELETE CASCADE,
+    FOREIGN KEY (channel_id) REFERENCES channel ON DELETE CASCADE
+);
+
 COMMIT;
 
-CREATE TABLE YOUTUBER (
-  youtuber_id   number          NOT NULL,
-  name          varchar(15)     NOT NULL,
-
-  CONSTRAINT YTBPK PRIMARY KEY (youtuber_id)
-);
-COMMIT;
-
-CREATE TABLE PERFORMER (
-  performer_id  number          NOT NULL,
-  name          varchar(15)     NOT NULL,
-  character     varchar(15)     NOT NULL,
-
-  CONSTRAINT PFMPK PRIMARY KEY (performer_id)
-);
-COMMIT;
-
-CREATE TABLE GENRE (
-  genre_num     number          NOT NULL,
-  genre_name    varchar(15)     NOT NULL,
-
-  CONSTRAINT GNRPK PRIMARY KEY (genre_num)
-);
-COMMIT;
-
-CREATE TABLE CHANNEL (
-  channel_id      char(24)      NOT NULL,
-  channel_name    varchar(40)   NOT NULL,
-  description     varchar(400)
-  total_views     number        NOT NULL,
-  subscriber_num  number        NOT NULL,
-  youtuber_id     number        NOT NULL,
-
-  CONSTRAINT CHNNLPK PRIMARY KEY (channel_id),
-  CONSTRAINT CHNNLFK FOREIGN KEY (youtuber_id)
-        REFERENCES YOUTUBER(youtuber_id)
-		ON DELETE CASCADE
-);
-COMMIT;
-
-CREATE TABLE HAS (
-  channel_id    char(24)      NOT NULL,
-  genre_num     number        NOT NULL,
-
-  CONSTRAINT HASCHFK FOREIGN KEY (channel_id)
-        REFERENCES YOUTUBER(youtuber_id)
-		ON DELETE CASCADE,
-  CONSTRAINT HASGNRFK FOREIGN KEY (genre_num)
-        REFERENCES GENRE(genre_num)
-  	ON DELETE CASCADE
-);
-COMMIT;
-
-CREATE TABLE COMMENT (
-  user_id       varchar(20)   NOT NULL,
-  comment_id    number        NOT NULL,
-  comment       varchar(400)  NOT NULL,
-  channel_id    char(24)      NOT NULL,
-
-  CONSTRAINT CMMTPK PRIMARY KEY (comment_id),
-  CONSTRAINT CMMTUSRFK FOREIGN KEY (user_id)
-        REFERENCES USER(user_id)
-  	ON DELETE CASCADE,
-  CONSTRAINT CMMTCHHNLFK FOREIGN KEY (channel_id)
-        REFERENCES CHANNEL(channel_id)
-    ON DELETE CASCADE
-);
-COMMIT;
-
-CREATE TABLE PARTICIPATION (
-  channel_id      char(24)    NOT NULL,
-  performer_id    number      NOT NULL,
-
-  CONSTRAINT PTCCHFK FOREIGN KEY (channel_id)
-        REFERENCES CHANNEL(channel_id)
-  	ON DELETE CASCADE,
-  CONSTRAINT PTCPFMFK FOREIGN KEY (performer_id)
-        REFERENCES PERFORMER(performer_id)
-    ON DELETE CASCADE
-);
-COMMIT;
-
-CREATE TABLE RECOMMENDATION (
-  user_id       varchar(20)   NOT NULL,
-  comment_id    number        NOT NULL,
-
-  CONSTRAINT RCMDUSRFK FOREIGN KEY (use_id)
-        REFERENCES USER(user_id)
-  	ON DELETE CASCADE,
-  CONSTRAINT RCMDCMMTFK FOREIGN KEY (comment_id)
-        REFERENCES COMMENT(comment_id)
-    ON DELETE CASCADE
-);
-COMMIT;
-
-CREATE TABLE RATING (
-  user_id       varchar(20)   NOT NULL,
-  channel_id    char(24)      NOT NULL,
-  rating        number,
-
-  CONSTRAINT RCMDUSRFK FOREIGN KEY (use_id)
-        REFERENCES USER(user_id)
-  	ON DELETE CASCADE,
-  CONSTRAINT RCMDCMMTFK FOREIGN KEY (channel_id)
-        REFERENCES CHANNEL(channel_id)
-    ON DELETE CASCADE
-
-);
-COMMIT;
-
-INSERT INTO USER VALUES ('LMPYOdro85396562', 'GCSl3yYFIqKEvq2x3', 'Brian', 'eagerPear1', 'Brian@nate.com' )
-INSERT INTO USER VALUES ('EncdmxYg47215749', 'EOpD5iuYBg5C', 'Phillip', 'solemnLlama5', 'Phillip@yahoo.com' )
-INSERT INTO USER VALUES ('GisxLZox39758465', '6pa8sMHI1hmHoI', 'William', 'superiorTacos7', 'William@naver.com' )
-INSERT INTO USER VALUES ('QtZOGLje77754112', 'qqntwmsv5', 'Kathryn', 'cruelCurlew4', 'Kathryn@naver.com' )
-INSERT INTO USER VALUES ('JnYIzNFN79637774', 'mqdMLhcI7UwjTBXYJ0', 'Vanessa', 'dearSwift2', 'Vanessa@nate.com' )
-INSERT INTO USER VALUES ('hVDSDgVG47924623', 'Hk5Rc@Gx41m97RclnYdt', 'Dale', 'amazedDoughnut3', 'Dale@nate.com' )
-INSERT INTO USER VALUES ('nVvqZdXl84714668', 'T2xnXtYUJyNCYJ9Fg', 'Helen', 'shamefulVenison0', 'Helen@yahoo.com' )
-INSERT INTO USER VALUES ('EhvofVdz76231623', 'nUpzqTf3KdlbW', 'Katina', 'humorousToucan8', 'Katina@nate.com' )
-INSERT INTO USER VALUES ('VrzBYaxW49491493', 'cSJgdh47sT', 'Thomas', 'mildSnipe9', 'Thomas@daum.com' )
-INSERT INTO USER VALUES ('wJcUwXTp63465588', 'pJd2Zw0Nh', 'Larry', 'puzzledHeron0', 'Larry@korea.com' )
-INSERT INTO USER VALUES ('CJOgXTpt91264634', '8Yrta55xxMUaOsihyW', 'Todd', 'adoringMacaw6', 'Todd@korea.com' )
-INSERT INTO USER VALUES ('nNoSDtAh24567412', '2PCIORGj@w', 'Bertha', 'grudgingGarlic2', 'Bertha@nate.com' )
-INSERT INTO USER VALUES ('XXStUehg15356748', '6fuK390@DWB!oTFd', 'Sarah', 'panickyCake9', 'Sarah@korea.com' )
-INSERT INTO USER VALUES ('dRyBMYji76582356', 'ncGVHITo1', 'Ella', 'ecstaticBurritos4', 'Ella@gmail.com' )
-INSERT INTO USER VALUES ('PFdzXaje88332467', 'UBnnupVcOmEsGcUvoohq', 'Heather', 'wearyCheetah2', 'Heather@naver.com' )
-INSERT INTO USER VALUES ('cNoCyCnr61545123', 'HQBY4X02cRTnsGoUAzA', 'Charley', 'lyingDotterel3', 'Charley@korea.com' )
-INSERT INTO USER VALUES ('bxNJVBjl27443873', 'D!!fI74KL7', 'Jay', 'lovesickBasmati4', 'Jay@outlook.com' )
-INSERT INTO USER VALUES ('LdcIovmq14135177', 'r!VmADO52oARegyU0pIp', 'William', 'cheerfulFlamingo7', 'William@nate.com' )
-INSERT INTO USER VALUES ('BetobjwG68693534', 'z5BJBpFh', 'Deborah', 'cockyTeal2', 'Deborah@naver.com' )
-INSERT INTO USER VALUES ('fPqOkGtQ74573485', 'CfUFzCgp869@x7WG', 'Bobby', 'wearyMuesli7', 'Bobby@naver.com' )
-INSERT INTO USER VALUES ('GQuQnhkm72589384', 'cTo8ZLyqvHw0YUiY', 'George', 'somberSnail5', 'George@nate.com' )
-INSERT INTO USER VALUES ('OudSAAJW59468627', 'n4u8SS4weafUAo', 'Beatrice', 'pleasedThrush9', 'Beatrice@yahoo.com' )
-INSERT INTO USER VALUES ('ZnOhZBtK24758359', 'vqGlLYwmA!', 'Janice', 'dopeyEland3', 'Janice@yahoo.com' )
-INSERT INTO USER VALUES ('hsyhZKrU66218967', 'L4sPh1x2', 'Michael', 'joyfulCamel9', 'Michael@yahoo.com' )
-INSERT INTO USER VALUES ('mVAnYJvT71623139', 'wLIx7y9!J9GW3Qfn!eX', 'Laverne', 'zestyGelding5', 'Laverne@daum.com' )
-INSERT INTO USER VALUES ('cUGjbOlF25536283', 'uKzsSkdAXkHEsrwdVj', 'Charles', 'gloomyThrush8', 'Charles@gmail.com' )
-INSERT INTO USER VALUES ('QqQPQIhP95962499', 'cwAhq2x3IIrTLfaJ', 'Debbie', 'crushedTomatoe8', 'Debbie@korea.com' )
-INSERT INTO USER VALUES ('YyvQxsZE85515361', 'mDhuq9vkyH9n5j!SPW2o', 'Genaro', 'wrathfulPretzels8', 'Genaro@gmail.com' )
-INSERT INTO USER VALUES ('LSvTOkGb81736949', 'C3Xlzz6tLsW', 'William', 'murkyGatorade5', 'William@yahoo.com' )
-INSERT INTO USER VALUES ('VxtaGung96876452', '!!hKnuSauT6kRVvM!WE', 'Jan', 'lovesickBittern1', 'Jan@nate.com' )
-INSERT INTO USER VALUES ('YwqthJGU78552227', 'TBJePphig2aq0', 'William', 'similarMuesli5', 'William@nate.com' )
-INSERT INTO USER VALUES ('VeRmKTLX88455185', 'ZY9JBYh1dRVCTz2eNUyG', 'Jennifer', 'hushedDoves3', 'Jennifer@nate.com' )
-INSERT INTO USER VALUES ('actIiZXd83517694', 'do!2bwl6Gl8lxILTF93', 'Ronnie', 'lazySalt9', 'Ronnie@outlook.com' )
-INSERT INTO USER VALUES ('MYIRcmAC27417883', 'RVqJURqe6', 'Elizabeth', 'aloofCockatoo8', 'Elizabeth@yahoo.com' )
-INSERT INTO USER VALUES ('klGmFIGx14262719', 'y7zq7uU0EsUNOuwjLom', 'Geraldine', 'ferventIcecream3', 'Geraldine@naver.com' )
-INSERT INTO USER VALUES ('KVdtoYxv63852619', 'kuEKqSMe@R', 'Kari', 'outlyingEggs9', 'Kari@nate.com' )
-INSERT INTO USER VALUES ('WIpNZleW34113322', '51LOFeojpi0F55', 'Bradley', 'outlyingDunbird8', 'Bradley@outlook.com' )
-INSERT INTO USER VALUES ('wOHNcsHO51835346', 'VlFM6mZDdr', 'Billy', 'obsessedHyena0', 'Billy@nate.com' )
-INSERT INTO USER VALUES ('KZyMlHBv11282466', 'wxgqzLa2NyPXK7!G', 'Colleen', 'enviousBoa7', 'Colleen@yahoo.com' )
-INSERT INTO USER VALUES ('rVNkTuRE87874947', 'WAxVwZonPL4', 'Stephanie', 'kindTermite9', 'Stephanie@daum.com' )
-INSERT INTO USER VALUES ('fEeRDcmr67591963', '2lA@vB58YUv', 'Emma', 'worriedBurritos4', 'Emma@gmail.com' )
-INSERT INTO USER VALUES ('TIbsfoZv11111248', '@v!r!u3oMoiDov3F', 'Paul', 'peskyLard1', 'Paul@gmail.com' )
-INSERT INTO USER VALUES ('LahPEhFX36536984', '@ZsFLPwiBoX@Bm', 'Mary', 'selfishPoultry4', 'Mary@korea.com' )
-INSERT INTO USER VALUES ('ZqOKnsVt75238166', 'JbQvwy4NeeJvHWC7', 'Stephanie', 'panickyAbalone5', 'Stephanie@gmail.com' )
-INSERT INTO USER VALUES ('TNhXbEQl28893775', 'ZAYwz37o5HpqvMU', 'Willie', 'gleefulTacos7', 'Willie@daum.com' )
-INSERT INTO USER VALUES ('EdPXIlll29283649', 'VEpb08kEtaj9', 'Michaela', 'murkyTortoise1', 'Michaela@outlook.com' )
-INSERT INTO USER VALUES ('vzPTGCdr16146227', 'Xg8Y@SlP7sjBm1d9dMH', 'Casey', 'bubblyBaboon3', 'Casey@nate.com' )
-INSERT INTO USER VALUES ('LehhBAcl26278233', 'lobb0GNIJIkxPzenbw', 'Troy', 'scornfulTomatoe0', 'Troy@gmail.com' )
-INSERT INTO USER VALUES ('JdpaJawP35875635', 'l!!kppYXBjaix6SoRZDg', 'Rebecca', 'trustingJaguar1', 'Rebecca@naver.com' )
-INSERT INTO USER VALUES ('xMAgPvbz41558794', 'A!0Gh17goWo62Z', 'Ruth', 'exactingBobolink0', 'Ruth@nate.com' )
+INSERT INTO CUSTOMER VALUES ('LMPYOdro85396562', 'GCSl3yYFIqKEvq2x3', 'Brian', 'eagerPear1', 'Brian@nate.com' )
+INSERT INTO CUSTOMER VALUES ('EncdmxYg47215749', 'EOpD5iuYBg5C', 'Phillip', 'solemnLlama5', 'Phillip@yahoo.com' )
+INSERT INTO CUSTOMER VALUES ('GisxLZox39758465', '6pa8sMHI1hmHoI', 'William', 'superiorTacos7', 'William@naver.com' )
+INSERT INTO CUSTOMER VALUES ('QtZOGLje77754112', 'qqntwmsv5', 'Kathryn', 'cruelCurlew4', 'Kathryn@naver.com' )
+INSERT INTO CUSTOMER VALUES ('JnYIzNFN79637774', 'mqdMLhcI7UwjTBXYJ0', 'Vanessa', 'dearSwift2', 'Vanessa@nate.com' )
+INSERT INTO CUSTOMER VALUES ('hVDSDgVG47924623', 'Hk5Rc@Gx41m97RclnYdt', 'Dale', 'amazedDoughnut3', 'Dale@nate.com' )
+INSERT INTO CUSTOMER VALUES ('nVvqZdXl84714668', 'T2xnXtYUJyNCYJ9Fg', 'Helen', 'shamefulVenison0', 'Helen@yahoo.com' )
+INSERT INTO CUSTOMER VALUES ('EhvofVdz76231623', 'nUpzqTf3KdlbW', 'Katina', 'humorousToucan8', 'Katina@nate.com' )
+INSERT INTO CUSTOMER VALUES ('VrzBYaxW49491493', 'cSJgdh47sT', 'Thomas', 'mildSnipe9', 'Thomas@daum.com' )
+INSERT INTO CUSTOMER VALUES ('wJcUwXTp63465588', 'pJd2Zw0Nh', 'Larry', 'puzzledHeron0', 'Larry@korea.com' )
+INSERT INTO CUSTOMER VALUES ('CJOgXTpt91264634', '8Yrta55xxMUaOsihyW', 'Todd', 'adoringMacaw6', 'Todd@korea.com' )
+INSERT INTO CUSTOMER VALUES ('nNoSDtAh24567412', '2PCIORGj@w', 'Bertha', 'grudgingGarlic2', 'Bertha@nate.com' )
+INSERT INTO CUSTOMER VALUES ('XXStUehg15356748', '6fuK390@DWB!oTFd', 'Sarah', 'panickyCake9', 'Sarah@korea.com' )
+INSERT INTO CUSTOMER VALUES ('dRyBMYji76582356', 'ncGVHITo1', 'Ella', 'ecstaticBurritos4', 'Ella@gmail.com' )
+INSERT INTO CUSTOMER VALUES ('PFdzXaje88332467', 'UBnnupVcOmEsGcUvoohq', 'Heather', 'wearyCheetah2', 'Heather@naver.com' )
+INSERT INTO CUSTOMER VALUES ('cNoCyCnr61545123', 'HQBY4X02cRTnsGoUAzA', 'Charley', 'lyingDotterel3', 'Charley@korea.com' )
+INSERT INTO CUSTOMER VALUES ('bxNJVBjl27443873', 'D!!fI74KL7', 'Jay', 'lovesickBasmati4', 'Jay@outlook.com' )
+INSERT INTO CUSTOMER VALUES ('LdcIovmq14135177', 'r!VmADO52oARegyU0pIp', 'William', 'cheerfulFlamingo7', 'William@nate.com' )
+INSERT INTO CUSTOMER VALUES ('BetobjwG68693534', 'z5BJBpFh', 'Deborah', 'cockyTeal2', 'Deborah@naver.com' )
+INSERT INTO CUSTOMER VALUES ('fPqOkGtQ74573485', 'CfUFzCgp869@x7WG', 'Bobby', 'wearyMuesli7', 'Bobby@naver.com' )
+INSERT INTO CUSTOMER VALUES ('GQuQnhkm72589384', 'cTo8ZLyqvHw0YUiY', 'George', 'somberSnail5', 'George@nate.com' )
+INSERT INTO CUSTOMER VALUES ('OudSAAJW59468627', 'n4u8SS4weafUAo', 'Beatrice', 'pleasedThrush9', 'Beatrice@yahoo.com' )
+INSERT INTO CUSTOMER VALUES ('ZnOhZBtK24758359', 'vqGlLYwmA!', 'Janice', 'dopeyEland3', 'Janice@yahoo.com' )
+INSERT INTO CUSTOMER VALUES ('hsyhZKrU66218967', 'L4sPh1x2', 'Michael', 'joyfulCamel9', 'Michael@yahoo.com' )
+INSERT INTO CUSTOMER VALUES ('mVAnYJvT71623139', 'wLIx7y9!J9GW3Qfn!eX', 'Laverne', 'zestyGelding5', 'Laverne@daum.com' )
+INSERT INTO CUSTOMER VALUES ('cUGjbOlF25536283', 'uKzsSkdAXkHEsrwdVj', 'Charles', 'gloomyThrush8', 'Charles@gmail.com' )
+INSERT INTO CUSTOMER VALUES ('QqQPQIhP95962499', 'cwAhq2x3IIrTLfaJ', 'Debbie', 'crushedTomatoe8', 'Debbie@korea.com' )
+INSERT INTO CUSTOMER VALUES ('YyvQxsZE85515361', 'mDhuq9vkyH9n5j!SPW2o', 'Genaro', 'wrathfulPretzels8', 'Genaro@gmail.com' )
+INSERT INTO CUSTOMER VALUES ('LSvTOkGb81736949', 'C3Xlzz6tLsW', 'William', 'murkyGatorade5', 'William@yahoo.com' )
+INSERT INTO CUSTOMER VALUES ('VxtaGung96876452', '!!hKnuSauT6kRVvM!WE', 'Jan', 'lovesickBittern1', 'Jan@nate.com' )
+INSERT INTO CUSTOMER VALUES ('YwqthJGU78552227', 'TBJePphig2aq0', 'William', 'similarMuesli5', 'William@nate.com' )
+INSERT INTO CUSTOMER VALUES ('VeRmKTLX88455185', 'ZY9JBYh1dRVCTz2eNUyG', 'Jennifer', 'hushedDoves3', 'Jennifer@nate.com' )
+INSERT INTO CUSTOMER VALUES ('actIiZXd83517694', 'do!2bwl6Gl8lxILTF93', 'Ronnie', 'lazySalt9', 'Ronnie@outlook.com' )
+INSERT INTO CUSTOMER VALUES ('MYIRcmAC27417883', 'RVqJURqe6', 'Elizabeth', 'aloofCockatoo8', 'Elizabeth@yahoo.com' )
+INSERT INTO CUSTOMER VALUES ('klGmFIGx14262719', 'y7zq7uU0EsUNOuwjLom', 'Geraldine', 'ferventIcecream3', 'Geraldine@naver.com' )
+INSERT INTO CUSTOMER VALUES ('KVdtoYxv63852619', 'kuEKqSMe@R', 'Kari', 'outlyingEggs9', 'Kari@nate.com' )
+INSERT INTO CUSTOMER VALUES ('WIpNZleW34113322', '51LOFeojpi0F55', 'Bradley', 'outlyingDunbird8', 'Bradley@outlook.com' )
+INSERT INTO CUSTOMER VALUES ('wOHNcsHO51835346', 'VlFM6mZDdr', 'Billy', 'obsessedHyena0', 'Billy@nate.com' )
+INSERT INTO CUSTOMER VALUES ('KZyMlHBv11282466', 'wxgqzLa2NyPXK7!G', 'Colleen', 'enviousBoa7', 'Colleen@yahoo.com' )
+INSERT INTO CUSTOMER VALUES ('rVNkTuRE87874947', 'WAxVwZonPL4', 'Stephanie', 'kindTermite9', 'Stephanie@daum.com' )
+INSERT INTO CUSTOMER VALUES ('fEeRDcmr67591963', '2lA@vB58YUv', 'Emma', 'worriedBurritos4', 'Emma@gmail.com' )
+INSERT INTO CUSTOMER VALUES ('TIbsfoZv11111248', '@v!r!u3oMoiDov3F', 'Paul', 'peskyLard1', 'Paul@gmail.com' )
+INSERT INTO CUSTOMER VALUES ('LahPEhFX36536984', '@ZsFLPwiBoX@Bm', 'Mary', 'selfishPoultry4', 'Mary@korea.com' )
+INSERT INTO CUSTOMER VALUES ('ZqOKnsVt75238166', 'JbQvwy4NeeJvHWC7', 'Stephanie', 'panickyAbalone5', 'Stephanie@gmail.com' )
+INSERT INTO CUSTOMER VALUES ('TNhXbEQl28893775', 'ZAYwz37o5HpqvMU', 'Willie', 'gleefulTacos7', 'Willie@daum.com' )
+INSERT INTO CUSTOMER VALUES ('EdPXIlll29283649', 'VEpb08kEtaj9', 'Michaela', 'murkyTortoise1', 'Michaela@outlook.com' )
+INSERT INTO CUSTOMER VALUES ('vzPTGCdr16146227', 'Xg8Y@SlP7sjBm1d9dMH', 'Casey', 'bubblyBaboon3', 'Casey@nate.com' )
+INSERT INTO CUSTOMER VALUES ('LehhBAcl26278233', 'lobb0GNIJIkxPzenbw', 'Troy', 'scornfulTomatoe0', 'Troy@gmail.com' )
+INSERT INTO CUSTOMER VALUES ('JdpaJawP35875635', 'l!!kppYXBjaix6SoRZDg', 'Rebecca', 'trustingJaguar1', 'Rebecca@naver.com' )
+INSERT INTO CUSTOMER VALUES ('xMAgPvbz41558794', 'A!0Gh17goWo62Z', 'Ruth', 'exactingBobolink0', 'Ruth@nate.com' )
 
 COMMIT;
 
@@ -303,94 +276,94 @@ INSERT INTO GENRE VALUES (22, 'Dance' )
 
 COMMIT;
 
-INSERT INTO CHANNEL VALUES ('UCRuSxVu4iqTK5kCh90ntAgA', 'ì´ëª‡ëª…', 'ê´‘ê³  ë° ë¹„ì¦ˆë‹ˆìŠ¤ ë¬¸ì˜ : chongmmyung@sandbox.co.kr í˜ì´ìŠ¤ë¶ : facebook.com/chongmmyung/ ì£¼ì†Œ : ì„œìš¸ì‹œ ìš©ì‚°êµ¬ ì„œë¹™ê³ ë¡œ 17 ...', 1029203555, 2420000, 1 )
-INSERT INTO CHANNEL VALUES ('UChbE5OZQ6dRHECsX0tEPEZQ', 'ì¥ì‚ì­ˆ', 'ë¹„ì¦ˆë‹ˆìŠ¤ ë¬¸ì˜: jangbbijju@metacomedy.net ìŠ¤íŠœë””ì˜¤ì¥ì‚ì­ˆ ì§€ì›í•˜ê¸°: recruit@studiojbbj.com.', 1641059347, 3380000, 2 )
-INSERT INTO CHANNEL VALUES ('UCB8Fets2QTgay4SrwyHOzpA', 'ì¨ë¦¬ì˜ ì˜ìƒíˆ°', 'ì˜ìƒíˆ° ë‹¨ì–´ì˜ ì°½ì‹œì, ì˜ìƒíˆ° ì›ì¡° ë§›ì§‘ ì¨ë¦¬ì˜ ì˜ìƒíˆ°!! í˜ì´ìŠ¤ë¶ / ì¸ìŠ¤íƒ€ / í‹±í†¡ / ì¹´ì¹´ì˜¤ìŠ¤í† ë¦¬ / ìœ íŠœë¸Œ ìš´ì˜ì¤‘.', 470947888, 655000, 3 )
-INSERT INTO CHANNEL VALUES ('UCszFjh7CEfwDb7UUGb4RzCQ', 'ì§¤íˆ°', 'ì´ ë§Œí™”ëŠ” ë¬´ë£Œë¡œ ì›ƒê²¨ì¤ë‹ˆë‹¤.', 1777214678, 2280000, 4 )
-INSERT INTO CHANNEL VALUES ('UCIZ5rCTYJ0s16FgT7OetVEQ', 'kiuê¸°ìš°ìŒ¤', 'ê¸°ìš°ê¸°ìš°ê¸°ìš°ê¸°ìš°ê¸°ìš°?', 458619864, 1290000, 5 )
-INSERT INTO CHANNEL VALUES ('UCzPhd4orXg5TWhM1u2RV-cw', 'í—¤ì–´ëª¬ Hairmon', 'í—¤ë¡±ì´ë“¤ì„ ìœ„í•œ ê³µê°„.', 24180928, 157000, 6 )
-INSERT INTO CHANNEL VALUES ('UCkOWueVolZTPOMaa5ZIYrxw', 'ê¸ˆê°•ì—°í™”', 'í—¤ì–´ì˜ ê°€ì¹˜ë¥¼ ë†’ì´ë‹¤.', 261589280, 644000, 7 )
+INSERT INTO CHANNEL VALUES ('UCRuSxVu4iqTK5kCh90ntAgA', 'ì´ëª‡ëª?', 'ê´‘ê³  ë°? ë¹„ì¦ˆ?‹ˆ?Š¤ ë¬¸ì˜ : chongmmyung@sandbox.co.kr ?˜?´?Š¤ë¶? : facebook.com/chongmmyung/ ì£¼ì†Œ : ?„œ?š¸?‹œ ?š©?‚°êµ? ?„œë¹™ê³ ë¡? 17 ...', 1029203555, 2420000, 1 )
+INSERT INTO CHANNEL VALUES ('UChbE5OZQ6dRHECsX0tEPEZQ', '?¥?‚ì­?', 'ë¹„ì¦ˆ?‹ˆ?Š¤ ë¬¸ì˜: jangbbijju@metacomedy.net ?Š¤?Šœ?””?˜¤?¥?‚ì­? ì§??›?•˜ê¸?: recruit@studiojbbj.com.', 1641059347, 3380000, 2 )
+INSERT INTO CHANNEL VALUES ('UCB8Fets2QTgay4SrwyHOzpA', '?¨ë¦¬ì˜ ?˜?ƒ?ˆ°', '?˜?ƒ?ˆ° ?‹¨?–´?˜ ì°½ì‹œ?, ?˜?ƒ?ˆ° ?›ì¡? ë§›ì§‘ ?¨ë¦¬ì˜ ?˜?ƒ?ˆ°!! ?˜?´?Š¤ë¶? / ?¸?Š¤?? / ?‹±?†¡ / ì¹´ì¹´?˜¤?Š¤?† ë¦? / ?œ ?Šœë¸? ?š´?˜ì¤?.', 470947888, 655000, 3 )
+INSERT INTO CHANNEL VALUES ('UCszFjh7CEfwDb7UUGb4RzCQ', 'ì§¤íˆ°', '?´ ë§Œí™”?Š” ë¬´ë£Œë¡? ?›ƒê²¨ì¤?‹ˆ?‹¤.', 1777214678, 2280000, 4 )
+INSERT INTO CHANNEL VALUES ('UCIZ5rCTYJ0s16FgT7OetVEQ', 'kiuê¸°ìš°?Œ¤', 'ê¸°ìš°ê¸°ìš°ê¸°ìš°ê¸°ìš°ê¸°ìš°?', 458619864, 1290000, 5 )
+INSERT INTO CHANNEL VALUES ('UCzPhd4orXg5TWhM1u2RV-cw', '?—¤?–´ëª? Hairmon', '?—¤ë¡±ì´?“¤?„ ?œ„?•œ ê³µê°„.', 24180928, 157000, 6 )
+INSERT INTO CHANNEL VALUES ('UCkOWueVolZTPOMaa5ZIYrxw', 'ê¸ˆê°•?—°?™”', '?—¤?–´?˜ ê°?ì¹˜ë?? ?†’?´?‹¤.', 261589280, 644000, 7 )
 INSERT INTO CHANNEL VALUES ('UCoJ_56-OMSe_jrp42ClhODA', 'ì°¨í™ CHAHONG', 'CHAHONG is a corporation that provides global beauty solutions. Starting the salon business with Chahong Ardor, an upscale ...', 81305288, 381000, 8 )
-INSERT INTO CHANNEL VALUES ('UCnFFOjljp1_sacTz7PfIIyg', 'LeoJ Makeup', 'ë©”ì´í¬ì—…ì•„í‹°ìŠ¤íŠ¸ ë ˆì˜¤ì œì´ ARTIST FOREVER ì¬ë°Œê²Œ ì˜ˆì˜ê³  ë©‹ìˆì–´ì§€ëŠ” ë°©ë²• â€“ ë¹„ì§€ë‹ˆìŠ¤ ë¬¸ì˜ : cct@leferi.com â€“ ì¸ìŠ¤íƒ€ ...', 195334555, 1020000, 9 )
+INSERT INTO CHANNEL VALUES ('UCnFFOjljp1_sacTz7PfIIyg', 'LeoJ Makeup', 'ë©”ì´?¬?—…?•„?‹°?Š¤?Š¸ ? ˆ?˜¤? œ?´ ARTIST FOREVER ?¬ë°Œê²Œ ?˜ˆ?˜ê³? ë©‹ìˆ?–´ì§??Š” ë°©ë²• ?? ë¹„ì??‹ˆ?Š¤ ë¬¸ì˜ : cct@leferi.com ?? ?¸?Š¤?? ...', 195334555, 1020000, 9 )
 INSERT INTO CHANNEL VALUES ('UC9kmlDcqksaOnCkC_qzGacA', 'RISABAE', 'risabaeofficial@gmail.com https://instagram.com/risabae_art.', 293333063, 2260000, 10 )
-INSERT INTO CHANNEL VALUES ('UCuZu8NrpBG4WPXRi-hPBl-A', 'ì¡°íš¨ì§„ HYOJIN', 'insta : https://www.instagram.com/hyojinc_/ e-mail : chohyojin@1994company.com.', 206871775, 1790000, 11 )
-INSERT INTO CHANNEL VALUES ('UCnekLiljel-Px4ClMC7b3mg', 'íšŒì‚¬ì›A', 'ë³´í†µ íšŒì‚¬ì›ì…ë‹ˆë‹¤. buisness inquiry : garickson18@gmail.com - ì—…ë¬´ë¬¸ì˜ ì´ì™¸ì˜ ë©”ì¼ì—ëŠ” íšŒì‹ í•˜ì§€ ì•ŠìŠµë‹ˆë‹¤.', 446509608, 1240000, 12 )
-INSERT INTO CHANNEL VALUES ('UC1B6SalAoiJD7eHfMUA9QrA', 'ìˆë°•ìŠ¤', 'ì•ˆë…•í•˜ì„¸ìš” "ìŠ¤ì¼€ì¹˜ì½”ë¯¸ë””" ì±„ë„ ìˆë°•ìŠ¤ì…ë‹ˆë‹¤ ëª¨ë“  ë¬¸ì˜ëŠ” shortbox@metacomedy.net.', 302485636, 2280000, 13 )
-INSERT INTO CHANNEL VALUES ('UCGX5sP4ehBkihHwt5bs5wvg', 'í”¼ì‹ëŒ€í•™Psick Univ', 'ì½”ë¯¸ë”” ì¸ì¬ ìœ¡ì„± ë° ì—°êµ¬ì˜ ë©”ì¹´ í”¼ì‹ëŒ€í•™ ë©¤ë²„ ì´ìš©ì£¼ ì •ì¬í˜• ê¹€ë¯¼ìˆ˜ í”¼ì‹ëŒ€í•™ ì˜¤ë¦¬ì§€ë‚  ì»¨í…ì¸  â™¡ ì˜ˆëŠ¥í•™ê³¼ | í”¼ì‹ëŒ€í•™ ì‹ ì…ìƒë“¤ì„ ...', 574672901, 1630000, 14 )
-INSERT INTO CHANNEL VALUES ('UC5xLohcPE65Y-U62X6snmRQ', 'ë¹ ë”ë„ˆìŠ¤ BDNS', 'í•˜ì´í¼ ë¦¬ì–¼ë¦¬ì¦˜ì˜ ì½©íŠ¸ì™€ ì½”ë¯¸ë”” ì˜ìƒì„ ë§Œë“­ë‹ˆë‹¤ ì›°ë©”ì´ë“œ ì½”ë¯¸ë””ë¥¼ ì§€í–¥í•©ë‹ˆë‹¤ ì½œë¼ë³´, ë¹„ì¦ˆë‹ˆìŠ¤ ë¬¸ì˜ëŠ” ë¬¸ìƒí›ˆì„ ì¶¤ì¶”ê²Œ í•©ë‹ˆë‹¤ ...', 302338156, 931000, 15 )
-INSERT INTO CHANNEL VALUES ('UCYtjW8dGkaeHwrMiB01Xa_Q', 'ìŠ¤íŠœë””ì˜¤ ì™€í”Œ - STUDIO WAFFLE', 'ê°“ êµ¬ì›Œ ë‚¸ ê¿€ì¼ ì½˜í…ì¸  ã€ŠSTUDIO WAFFLEã€‹ Freshly baked HONEY-JAM Contents ã€ŠSTUDIO WAFFLEã€‹ Welcome to ìŠ¤íŠœë””ì˜¤ ...', 336735552, 1310000, 16 )
-INSERT INTO CHANNEL VALUES ('UClErHbdZKUnD1NyIUeQWvuQ', 'MTN ë¨¸ë‹ˆíˆ¬ë°ì´ë°©ì†¡', 'MTN ë¨¸ë‹ˆíˆ¬ë°ì´ë°©ì†¡ ì±„ë„â—‡ ì–¸ì œë‚˜ ì‹œì²­ìì˜ ëˆˆë†’ì´ì—ì„œ ë‹¤ì–‘í•œ ì½˜í…ì¸ ë¥¼ ì œê³µí•˜ëŠ” ë¨¸ë‹ˆíˆ¬ë°ì´ë°©ì†¡ ì±„ë„ì— ì˜¤ì‹  ê²ƒì„ í™˜ì˜í•©ë‹ˆë‹¤.', 1057432844, 914000, 17 )
-INSERT INTO CHANNEL VALUES ('UCsJ6RuBiTVWRX156FVbeaGg', 'ìŠˆì¹´ì›”ë“œ', 'ê°ì¢… ë¬¸ì˜ : syukaworld@sandboxnetwork.net ìœ¼ë¡œ ë¶€íƒë“œë¦½ë‹ˆë‹¤. ê²½ì œ, ê¸ˆìœµì„ ê¸°ë°˜ìœ¼ë¡œ ë‹¬ë¦¬ëŠ” ë°©ì†¡! ì •ì¹˜ëŠ” ì•„ì£¼. ì „í˜€. ëŒ€ë‹¨íˆ.', 534789716, 2410000, 18 )
-INSERT INTO CHANNEL VALUES ('UCgheNMc3gGHLsT-RISdCzDQ', 'ì„¸ë°”ì‹œ ê°•ì—° Sebasi Talk', 'ë” ì¢‹ì€ ì„¸ìƒì„ ìœ„í•œ ì§€ì‹ê³¼ ê²½í—˜, ê·¸ë¦¬ê³  ì•„ì´ë””ì–´ë¥¼ 15ë¶„ ê°•ì—° ìŠ¤í† ë¦¬ë¡œ ë‚˜ëˆ•ë‹ˆë‹¤. ''êµ¬ë…'' í´ë¦­í•˜ì‹œë©´ ìƒˆ ê°•ì—° ì˜ìƒ ì†Œì‹ì„ í¸í•˜ê²Œ ...', 378174646, 1610000, 19 )
-INSERT INTO CHANNEL VALUES ('UCF8AeLlUbEpKju6v1H6p8Eg', 'í•œêµ­ê²½ì œTV', 'ëŒ€í•œë¯¼êµ­ì˜ ê²½ì œë¥¼ ë³´ì„¸ìš”! â–³ë¹ ë¥´ê³  ì •í™•í•œ ê²½ì œÂ·ì¦ê¶Œ ë‰´ìŠ¤ì™€ íŒŒíŠ¸ë„ˆìŠ¤ë“¤ì˜ ë¶„ì„ì§„ë‹¨ì„ 24ì‹œê°„ ì „í•´ë“œë¦½ë‹ˆë‹¤. â–³êµ¬ë…ì¢‹ì•„ìš” ê·¸ë¦¬ê³  ...', 218692519, 1000000, 20 )
-INSERT INTO CHANNEL VALUES ('UC79hJz6y1EEiIkwfHOuWC4w', 'ê¹€ì‹œì„ ', 'ëª¨ë“  ê²ƒì˜ ë¯¸í•™ì„ ì¬ë°ŒëŠ” ''ì‹œì„ ''ìœ¼ë¡œ í’€ì–´ë‚´ëŠ” ì˜í™” ë“œë¼ë§ˆ / ê²Œì„ / ì „ì ì œí’ˆ / íŒ¨ì…˜ / ì˜ˆëŠ¥ / CF / ë®¤ì§ë¹„ë””ì˜¤ ~ ì •ì£¼í–‰í•˜ê²Œ ë§Œë“œëŠ” ë‹¹ì‹  ...', 542941467, 1460000, 21 )
-INSERT INTO CHANNEL VALUES ('UCaHGOzOyeYzLQeKsVkfLEGA', 'ì§€ë¬´ë¹„ : G Movie', 'Gë¦¬ëŠ” ì˜í™” ì±„ë„ì„ ë¹™ìí•œ ë“œë¼ë§ˆ&ì˜ˆëŠ¥&ê²Œì„&ì „ì ì œí’ˆ , ì‚¬ì‹¤ ëª¨ë“  ê±¸ ë‹¤ í•˜ë©° ì–´ë–»ê²Œë“  ì¬ë°Œê²Œ ë§Œë“œëŠ” Gë¦¬ëŠ” ì±„ë„, ì§€ë¬´ë¹„ : G ...', 958042641, 2370000, 22 )
-INSERT INTO CHANNEL VALUES ('UCMguxwveCsLVpyKrLz-EFTg', 'ë‹¬ë¹›ë®¤ì¦ˆ', 'ìœ ëª…í•˜ì§€ë§Œ ì•„ì§ ëª»ë´¤ê±°ë‚˜ ì•Œë ¤ì§€ì§€ì•Šì•„ì„œ ëª»ë´¤ê±°ë‚˜ ë´¤ì§€ë§Œ ë‹¤ì‹œë³´ê³ ì‹¶ì€ ì˜í™”ì™€ ë“œë¼ë§ˆë¥¼ ì†Œê°œí•˜ëŠ” ì±„ë„ì…ë‹ˆë‹¤. ë¹„ì§€ë‹ˆìŠ¤ ë¬¸ì˜ ...', 319334849, 1200000, 23 )
-INSERT INTO CHANNEL VALUES ('UCpCiIDf9UrfRqte55FHWlYQ', 'ë“œë¦¼í…”ëŸ¬(DreamTeller)', '"ëŒ€ì¤‘ë¬¸í™”ì˜ ê¹Šì´ë¥¼ ë°œê²¬í•©ë‹ˆë‹¤." ëŒ€ì¤‘ë¬¸í™”ì˜ ê°€ë²¼ì›€ ë’¤ì—ëŠ” ì–´ë§ˆì–´ë§ˆí•œ ë…¸ë ¥ë“¤ì´ ìˆìŠµë‹ˆë‹¤. ì €ëŠ” ê·¸ëŸ° ì§€ë‚˜ì¹˜ê¸° ì‰¬ìš´ ê·¸ë“¤ì˜ ë…¸ë ¥ì„ ...', 188776441, 1090000, 24 )
-INSERT INTO CHANNEL VALUES ('UCd4FmcWIVdWAy0-Q8OJBloQ', 'ì‚¬ë‚˜ê³  Sanago', 'ì•ˆë…•í•˜ì„¸ìš” 3Díœ ì¥ì¸ ì‚¬ë‚˜ê³ ì…ë‹ˆë‹¤. It''s a guy''s channel that makes anything with 3D pen.', 461928048, 3190000, 25 )
-INSERT INTO CHANNEL VALUES ('UCPBvwGeynLRFTgjqnlKyotw', 'ë”±ì§€ DDAKG', 'ì•ˆë…•í•˜ì„¸ìš”. êµ¿ì¦ˆ ë§Œë“œëŠ” ë”±ì§€ì…ë‹ˆë‹¤.', 27947780, 252000, 26 )
-INSERT INTO CHANNEL VALUES ('UCp94pzrtA5wPyZazbDq0CXA', 'ê¸±ë¸” Geekble', 'ì €í¬ëŠ” ì“¸ëª¨ì—†ëŠ” ì‘í’ˆë§Œ ë§Œë“­ë‹ˆë‹¤. ì“¸ëª¨ìˆëŠ” ë¬¼ê±´ì€ ì´ë§ˆíŠ¸ì—ì„œ ì°¾ìœ¼ì‹œëŠ”ê²Œ ì¢‹ìŠµë‹ˆë‹¤,, ê³µëŒ€ìƒë“¤ì´ ëª¨ì¸ ê³¼í•™/ê³µí•™ ì½˜í…ì¸  ì œì‘ì†Œ ...', 283228757, 958000, 27 )
-INSERT INTO CHANNEL VALUES ('UCuPeQ50gyXAl_70p0UT7WAQ', 'ê³µëŒì´ ìš©ë‹¬', 'ê³¼í•™ì„ ìŒì•…ì²˜ëŸ¼ ëˆ„êµ¬ë“ ì§€ ì¦ê¸¸ ìˆ˜ ìˆëŠ” ë¬¸í™”ë¥¼ ë§Œë“¤ê³ ì ë…¸ë ¥í•˜ê³  ìˆìŠµë‹ˆë‹¤! í‰ë²”í•˜ê³  ì§„ë¶€í•œ ê²ƒì—ì„œ ë²—ì–´ë‚˜ íŠ¹ì´í•˜ê³  ê¸°ì´í•œ ì˜ìƒì„ ...', 229695907, 610000, 28 )
-INSERT INTO CHANNEL VALUES ('UCc8-vc45vK1-kUFZvii7s5g', 'ì˜¤ì€ì˜ì˜ ë²„í‚·ë¦¬ìŠ¤íŠ¸', 'ì—´ì • ê°€ë“ ''ì¸ê°„ ì˜¤ì€ì˜''ì˜ ì•„ì£¼ ì‚¬ì†Œí•œ ë²„í‚·ë¦¬ìŠ¤íŠ¸ ì˜¤ì€ì˜ì˜ ë²„í‚·ë¦¬ìŠ¤íŠ¸ ì½˜í…ì¸  ë° ì œíœ´ ë¬¸ì˜ Contact us Email.', 23327185, 444000, 29 )
-INSERT INTO CHANNEL VALUES ('UCFCtZJTuJhE18k8IXwmXTYQ', 'EBSDocumentary (EBS ë‹¤í)', 'EBS offers a wide range of high-quality documentaries dealing with subjects, such as knowledge, science, culture and others.', 2652125195, 2890000, 30 )
-INSERT INTO CHANNEL VALUES ('UC7A6GVOKGkD2CeUPW_l41Bg', 'ì•Œë©´ ìë‘í•  ìˆ˜ ìˆëŠ” ì§€ì‹', 'ì§€ì‹ì„ ìë‘í•˜ê³  ì‹¶ì„ ë•Œ ë³´ëŠ” ì±„ë„.', 384384292, 236000, 31 )
-INSERT INTO CHANNEL VALUES ('UCcYk_KPZZMLv_bcaSAWSSxA', 'ì§€ì‹ ë¸ŒëŸ°ì¹˜', 'ì—­ì‚¬, ì‚¬íšŒ, ë¬¸í™”, ì‹œì‚¬, ìƒì‹, ê³¼í•™, ì¡í•™ ë“±ë“±ì— ê´€í•œ ì´ì•¼ê¸° * ì§€ì‹ ë¸ŒëŸ°ì¹˜ ì±„ë„ì€ ë§¤ì£¼ ì¼ìš”ì¼ ì˜¤í›„ 6ì‹œì— ìƒˆë¡œìš´ ì˜ìƒì„ ì—…ë¡œë“œí•˜ê³  ...', 56846776, 509000, 32 )
-INSERT INTO CHANNEL VALUES ('UCbOwqHbQf0uspeRe7lY8e6Q', 'ìŠ¤íƒ€ì¼ê°€ì´ë“œ ìµœê²¨ìš¸', 'ì°¬ë€í•œ ì²­ì¶˜ì„ ê°™ì´ ì¦ê²¨ìš” insta @wt830.', 145809243, 626000, 33 )
-INSERT INTO CHANNEL VALUES ('UCcSepD5GRKpskptBW2TSKGg', 'ë””ë ‰í„° ì§±êµ¬ëŒ€ë””', 'íŠ¸ëœë“œì— ë¯¼ê°í•œ ë‚¨ì ì§±êµ¬ëŒ€ë”” ì…ë‹ˆë‹¤! â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ ë„¤ì´ë²„ ì¹´í˜ â–· https://cafe.naver.com/zzang9daddy íŠ¸ìœ„ì¹˜ ...', 214115847, 577000, 34 )
-INSERT INTO CHANNEL VALUES ('UCw-kXdzxMdMdLNI0ZlFFbmA', 'ì˜¤ëŠ˜ì˜ ì£¼ìš°ì¬', 'ë§¤ì£¼ ìƒˆë¡œìš´ ì£¼ìš°ì¬ë¥¼ ë§Œë‚˜ë‹¤ ê·¼ë³¸ìˆëŠ” ì£¼ìš°ì¬ì˜ íŒ¨ì…˜í˜„ì‹¤íŒ¨ì¹˜ ìœ íŠœë¸Œ ë¹„ì¦ˆë‹ˆìŠ¤ ë¬¸ì˜ todaywoojae@episodegroup.kr ...', 70958952, 743000, 35 )
-INSERT INTO CHANNEL VALUES ('UC8a6z7i9qypp9PqJ_0HhBrw', 'ê¹¡ìŠ¤íƒ€ì¼ë¦¬ìŠ¤íŠ¸', 'ê´€ë¦¬í•˜ëŠ” ë‚¨ì ìŠ¤íƒ€ì¼ë¦¬ìŠ¤íŠ¸ ''ê¹¡'' ì…ë‹ˆë‹¤. íŒ¨ì…˜ê³¼ í—¤ì–´ ê´€ë¦¬ì— ë¯¸ì³ ìˆìœ¼ë©°, ë‚¨ìì— ê´€í•œ ëª¨ë“ ê²ƒì„ ë¦¬ë·°í•˜ê³  ì§„ì‹¬ìœ¼ë¡œ ì˜ìƒì„ ë§Œë“­ë‹ˆë‹¤.', 294458572, 1140000, 36 )
-INSERT INTO CHANNEL VALUES ('UCPKNKldggioffXPkSmjs5lQ', '[í–„ì§€]Hamzy', 'ëŒ€ë¦¬ë§Œì¡±1000%%% [í–„ì§€]Hamzy''s ë¨¹ë°© â¤ ë¬¸ì˜ : hjh35550@gmail.com.', 3413574180, 10500000, 37 )
-INSERT INTO CHANNEL VALUES ('UCfpaSruWW3S4dibonKXENjA', 'tzuyangì¯”ì–‘', 'ë·°í‹°ê´€ë ¨ í˜‘ì°¬(í™”ì¥í’ˆ, ì„±í˜•ì™¸ê³¼, í”¼ë¶€ê³¼ ë“±) ë° ë‹¤ì´ì–´íŠ¸ ì œí’ˆêµ° í˜‘ì°¬(ì•½,ë³´ì¡°ì œ)ì€ ì¼ì ˆ ì§„í–‰í•˜ì§€ ì•Šê³  ìˆìŠµë‹ˆë‹¤. ì´ ë¶€ë¶„ ì–‘í•´ ë¶€íƒ ...', 1509017987, 7180000, 38 )
-INSERT INTO CHANNEL VALUES ('UCA6KBBX8cLwYZNepxlE_7SA', 'íˆë°¥heebab', 'ì•ˆë…•í•˜ì„¸ìš” ë¨¹ë°© í¬ë¦¬ì—ì´í„° íˆë°¥ ì…ë‹ˆë‹¤.', 462730668, 1380000, 39 )
-INSERT INTO CHANNEL VALUES ('UC-i2ywiuvjvpTy2zW-tXfkw', 'ë–µê°œë–µ', 'ddeonggae@sandboxnetwork.net.', 2866871131, 4820000, 40 )
-INSERT INTO CHANNEL VALUES ('UCZTavrg2A43lQMWxiK3yu7g', 'í•œì„¸ HANSE', '', 421868520, 2720000, 41 )
-INSERT INTO CHANNEL VALUES ('UCL01un1rw1MU3wj7-oEELQQ', '[ìœ¤ì´ë ¨]50ë…„ ìš”ë¦¬ë¹„ê²°', 'ìš”ë¦¬ì±„ë„ Korean food Cooking ASMR ë¨¹ë°© Authentic Korean Recipes You can learn the best traditional home meals from Korean ...', 272667530, 901000, 42 )
-INSERT INTO CHANNEL VALUES ('UCr5Kww9xqzPmSJTHyXl58YQ', 'Mrs macaronsë§ˆì¹´ë¡±ì—¬ì‚¬', 'ì‚¶ì„ ì •ì„±ê» ì‚´ì•„ë³´ê¸°.', 123635144, 624000, 43 )
-INSERT INTO CHANNEL VALUES ('UC0htUSwcxfSGNfK_5Q28JkA', '1ë¶„ìš”ë¦¬ ëšë”±ì´í˜•', 'í•œêµ­ì¸ì´ ì¢‹ì•„í•˜ëŠ” í¸ì§‘ì†ë„ì— ë§ì¶˜ 1ë¶„ìš”ë¦¬ ì˜ìƒì„ ì—…ë¡œë“œí•©ë‹ˆë‹¤.', 641155418, 1990000, 44 )
+INSERT INTO CHANNEL VALUES ('UCuZu8NrpBG4WPXRi-hPBl-A', 'ì¡°íš¨ì§? HYOJIN', 'insta : https://www.instagram.com/hyojinc_/ e-mail : chohyojin@1994company.com.', 206871775, 1790000, 11 )
+INSERT INTO CHANNEL VALUES ('UCnekLiljel-Px4ClMC7b3mg', '?šŒ?‚¬?›A', 'ë³´í†µ ?šŒ?‚¬?›?…?‹ˆ?‹¤. buisness inquiry : garickson18@gmail.com - ?—…ë¬´ë¬¸?˜ ?´?™¸?˜ ë©”ì¼?—?Š” ?šŒ?‹ ?•˜ì§? ?•Š?Šµ?‹ˆ?‹¤.', 446509608, 1240000, 12 )
+INSERT INTO CHANNEL VALUES ('UC1B6SalAoiJD7eHfMUA9QrA', '?ˆë°•ìŠ¤', '?•ˆ?…•?•˜?„¸?š” "?Š¤ì¼?ì¹˜ì½”ë¯¸ë””" ì±„ë„ ?ˆë°•ìŠ¤?…?‹ˆ?‹¤ ëª¨ë“  ë¬¸ì˜?Š” shortbox@metacomedy.net.', 302485636, 2280000, 13 )
+INSERT INTO CHANNEL VALUES ('UCGX5sP4ehBkihHwt5bs5wvg', '?”¼?‹???•™Psick Univ', 'ì½”ë?¸ë”” ?¸?¬ ?œ¡?„± ë°? ?—°êµ¬ì˜ ë©”ì¹´ ?”¼?‹???•™ ë©¤ë²„ ?´?š©ì£? ? •?¬?˜• ê¹?ë¯¼ìˆ˜ ?”¼?‹???•™ ?˜¤ë¦¬ì??‚  ì»¨í…ì¸? ?™¡ ?˜ˆ?Š¥?•™ê³? | ?”¼?‹???•™ ?‹ ?…?ƒ?“¤?„ ...', 574672901, 1630000, 14 )
+INSERT INTO CHANNEL VALUES ('UC5xLohcPE65Y-U62X6snmRQ', 'ë¹ ë”?„ˆ?Š¤ BDNS', '?•˜?´?¼ ë¦¬ì–¼ë¦¬ì¦˜?˜ ì½©íŠ¸?? ì½”ë?¸ë”” ?˜?ƒ?„ ë§Œë“­?‹ˆ?‹¤ ?›°ë©”ì´?“œ ì½”ë?¸ë””ë¥? ì§??–¥?•©?‹ˆ?‹¤ ì½œë¼ë³?, ë¹„ì¦ˆ?‹ˆ?Š¤ ë¬¸ì˜?Š” ë¬¸ìƒ?›ˆ?„ ì¶¤ì¶”ê²? ?•©?‹ˆ?‹¤ ...', 302338156, 931000, 15 )
+INSERT INTO CHANNEL VALUES ('UCYtjW8dGkaeHwrMiB01Xa_Q', '?Š¤?Šœ?””?˜¤ ???”Œ - STUDIO WAFFLE', 'ê°? êµ¬ì›Œ ?‚¸ ê¿??¼ ì½˜í…ì¸? ?ŠSTUDIO WAFFLE?? Freshly baked HONEY-JAM Contents ?ŠSTUDIO WAFFLE?? Welcome to ?Š¤?Šœ?””?˜¤ ...', 336735552, 1310000, 16 )
+INSERT INTO CHANNEL VALUES ('UClErHbdZKUnD1NyIUeQWvuQ', 'MTN ë¨¸ë‹ˆ?ˆ¬?°?´ë°©ì†¡', 'MTN ë¨¸ë‹ˆ?ˆ¬?°?´ë°©ì†¡ ì±„ë„?—‡ ?–¸? œ?‚˜ ?‹œì²???˜ ?ˆˆ?†’?´?—?„œ ?‹¤?–‘?•œ ì½˜í…ì¸ ë?? ? œê³µí•˜?Š” ë¨¸ë‹ˆ?ˆ¬?°?´ë°©ì†¡ ì±„ë„?— ?˜¤?‹  ê²ƒì„ ?™˜?˜?•©?‹ˆ?‹¤.', 1057432844, 914000, 17 )
+INSERT INTO CHANNEL VALUES ('UCsJ6RuBiTVWRX156FVbeaGg', '?Šˆì¹´ì›”?“œ', 'ê°ì¢… ë¬¸ì˜ : syukaworld@sandboxnetwork.net ?œ¼ë¡? ë¶??ƒ?“œë¦½ë‹ˆ?‹¤. ê²½ì œ, ê¸ˆìœµ?„ ê¸°ë°˜?œ¼ë¡? ?‹¬ë¦¬ëŠ” ë°©ì†¡! ? •ì¹˜ëŠ” ?•„ì£?. ? „??. ???‹¨?ˆ.', 534789716, 2410000, 18 )
+INSERT INTO CHANNEL VALUES ('UCgheNMc3gGHLsT-RISdCzDQ', '?„¸ë°”ì‹œ ê°•ì—° Sebasi Talk', '?” ì¢‹ì? ?„¸?ƒ?„ ?œ„?•œ ì§??‹ê³? ê²½í—˜, ê·¸ë¦¬ê³? ?•„?´?””?–´ë¥? 15ë¶? ê°•ì—° ?Š¤?† ë¦¬ë¡œ ?‚˜?ˆ•?‹ˆ?‹¤. ''êµ¬ë…'' ?´ë¦??•˜?‹œë©? ?ƒˆ ê°•ì—° ?˜?ƒ ?†Œ?‹?„ ?¸?•˜ê²? ...', 378174646, 1610000, 19 )
+INSERT INTO CHANNEL VALUES ('UCF8AeLlUbEpKju6v1H6p8Eg', '?•œêµ?ê²½ì œTV', '???•œë¯¼êµ­?˜ ê²½ì œë¥? ë³´ì„¸?š”! ?–³ë¹ ë¥´ê³? ? •?™•?•œ ê²½ì œÂ·ì¦ê¶Œ ?‰´?Š¤?? ?ŒŒ?Š¸?„ˆ?Š¤?“¤?˜ ë¶„ì„ì§„ë‹¨?„ 24?‹œê°? ? „?•´?“œë¦½ë‹ˆ?‹¤. ?–³êµ¬ë…ì¢‹ì•„?š” ê·¸ë¦¬ê³? ...', 218692519, 1000000, 20 )
+INSERT INTO CHANNEL VALUES ('UC79hJz6y1EEiIkwfHOuWC4w', 'ê¹??‹œ?„ ', 'ëª¨ë“  ê²ƒì˜ ë¯¸í•™?„ ?¬ë°ŒëŠ” ''?‹œ?„ ''?œ¼ë¡? ???–´?‚´?Š” ?˜?™” ?“œ?¼ë§? / ê²Œì„ / ? „? ? œ?’ˆ / ?Œ¨?…˜ / ?˜ˆ?Š¥ / CF / ë®¤ì§ë¹„ë””?˜¤ ~ ? •ì£¼í–‰?•˜ê²? ë§Œë“œ?Š” ?‹¹?‹  ...', 542941467, 1460000, 21 )
+INSERT INTO CHANNEL VALUES ('UCaHGOzOyeYzLQeKsVkfLEGA', 'ì§?ë¬´ë¹„ : G Movie', 'Gë¦¬ëŠ” ?˜?™” ì±„ë„?„ ë¹™ì?•œ ?“œ?¼ë§?&?˜ˆ?Š¥&ê²Œì„&? „? ? œ?’ˆ , ?‚¬?‹¤ ëª¨ë“  ê±? ?‹¤ ?•˜ë©? ?–´?–»ê²Œë“  ?¬ë°Œê²Œ ë§Œë“œ?Š” Gë¦¬ëŠ” ì±„ë„, ì§?ë¬´ë¹„ : G ...', 958042641, 2370000, 22 )
+INSERT INTO CHANNEL VALUES ('UCMguxwveCsLVpyKrLz-EFTg', '?‹¬ë¹›ë?¤ì¦ˆ', '?œ ëª…í•˜ì§?ë§? ?•„ì§? ëª»ë´¤ê±°ë‚˜ ?•Œ? ¤ì§?ì§??•Š?•„?„œ ëª»ë´¤ê±°ë‚˜ ë´¤ì?ë§? ?‹¤?‹œë³´ê³ ?‹¶?? ?˜?™”?? ?“œ?¼ë§ˆë?? ?†Œê°œí•˜?Š” ì±„ë„?…?‹ˆ?‹¤. ë¹„ì??‹ˆ?Š¤ ë¬¸ì˜ ...', 319334849, 1200000, 23 )
+INSERT INTO CHANNEL VALUES ('UCpCiIDf9UrfRqte55FHWlYQ', '?“œë¦¼í…”?Ÿ¬(DreamTeller)', '"??ì¤‘ë¬¸?™”?˜ ê¹Šì´ë¥? ë°œê²¬?•©?‹ˆ?‹¤." ??ì¤‘ë¬¸?™”?˜ ê°?ë²¼ì? ?’¤?—?Š” ?–´ë§ˆì–´ë§ˆí•œ ?…¸? ¥?“¤?´ ?ˆ?Šµ?‹ˆ?‹¤. ???Š” ê·¸ëŸ° ì§??‚˜ì¹˜ê¸° ?‰¬?š´ ê·¸ë“¤?˜ ?…¸? ¥?„ ...', 188776441, 1090000, 24 )
+INSERT INTO CHANNEL VALUES ('UCd4FmcWIVdWAy0-Q8OJBloQ', '?‚¬?‚˜ê³? Sanago', '?•ˆ?…•?•˜?„¸?š” 3D?œ ?¥?¸ ?‚¬?‚˜ê³ ì…?‹ˆ?‹¤. It''s a guy''s channel that makes anything with 3D pen.', 461928048, 3190000, 25 )
+INSERT INTO CHANNEL VALUES ('UCPBvwGeynLRFTgjqnlKyotw', '?”±ì§? DDAKG', '?•ˆ?…•?•˜?„¸?š”. êµ¿ì¦ˆ ë§Œë“œ?Š” ?”±ì§??…?‹ˆ?‹¤.', 27947780, 252000, 26 )
+INSERT INTO CHANNEL VALUES ('UCp94pzrtA5wPyZazbDq0CXA', 'ê¸±ë¸” Geekble', '???¬?Š” ?“¸ëª¨ì—†?Š” ?‘?’ˆë§? ë§Œë“­?‹ˆ?‹¤. ?“¸ëª¨ìˆ?Š” ë¬¼ê±´?? ?´ë§ˆíŠ¸?—?„œ ì°¾ìœ¼?‹œ?Š”ê²? ì¢‹ìŠµ?‹ˆ?‹¤,, ê³µë??ƒ?“¤?´ ëª¨ì¸ ê³¼í•™/ê³µí•™ ì½˜í…ì¸? ? œ?‘?†Œ ...', 283228757, 958000, 27 )
+INSERT INTO CHANNEL VALUES ('UCuPeQ50gyXAl_70p0UT7WAQ', 'ê³µëŒ?´ ?š©?‹¬', 'ê³¼í•™?„ ?Œ?•…ì²˜ëŸ¼ ?ˆ„êµ¬ë“ ì§? ì¦ê¸¸ ?ˆ˜ ?ˆ?Š” ë¬¸í™”ë¥? ë§Œë“¤ê³ ì ?…¸? ¥?•˜ê³? ?ˆ?Šµ?‹ˆ?‹¤! ?‰ë²”í•˜ê³? ì§„ë??•œ ê²ƒì—?„œ ë²—ì–´?‚˜ ?Š¹?´?•˜ê³? ê¸°ì´?•œ ?˜?ƒ?„ ...', 229695907, 610000, 28 )
+INSERT INTO CHANNEL VALUES ('UCc8-vc45vK1-kUFZvii7s5g', '?˜¤???˜?˜ ë²„í‚·ë¦¬ìŠ¤?Š¸', '?—´? • ê°??“ ''?¸ê°? ?˜¤???˜''?˜ ?•„ì£? ?‚¬?†Œ?•œ ë²„í‚·ë¦¬ìŠ¤?Š¸ ?˜¤???˜?˜ ë²„í‚·ë¦¬ìŠ¤?Š¸ ì½˜í…ì¸? ë°? ? œ?œ´ ë¬¸ì˜ Contact us Email.', 23327185, 444000, 29 )
+INSERT INTO CHANNEL VALUES ('UCFCtZJTuJhE18k8IXwmXTYQ', 'EBSDocumentary (EBS ?‹¤?)', 'EBS offers a wide range of high-quality documentaries dealing with subjects, such as knowledge, science, culture and others.', 2652125195, 2890000, 30 )
+INSERT INTO CHANNEL VALUES ('UC7A6GVOKGkD2CeUPW_l41Bg', '?•Œë©? ??‘?•  ?ˆ˜ ?ˆ?Š” ì§??‹', 'ì§??‹?„ ??‘?•˜ê³? ?‹¶?„ ?•Œ ë³´ëŠ” ì±„ë„.', 384384292, 236000, 31 )
+INSERT INTO CHANNEL VALUES ('UCcYk_KPZZMLv_bcaSAWSSxA', 'ì§??‹ ë¸ŒëŸ°ì¹?', '?—­?‚¬, ?‚¬?šŒ, ë¬¸í™”, ?‹œ?‚¬, ?ƒ?‹, ê³¼í•™, ?¡?•™ ?“±?“±?— ê´??•œ ?´?•¼ê¸? * ì§??‹ ë¸ŒëŸ°ì¹? ì±„ë„?? ë§¤ì£¼ ?¼?š”?¼ ?˜¤?›„ 6?‹œ?— ?ƒˆë¡œìš´ ?˜?ƒ?„ ?—…ë¡œë“œ?•˜ê³? ...', 56846776, 509000, 32 )
+INSERT INTO CHANNEL VALUES ('UCbOwqHbQf0uspeRe7lY8e6Q', '?Š¤???¼ê°??´?“œ ìµœê²¨?š¸', 'ì°¬ë??•œ ì²?ì¶˜ì„ ê°™ì´ ì¦ê²¨?š” insta @wt830.', 145809243, 626000, 33 )
+INSERT INTO CHANNEL VALUES ('UCcSepD5GRKpskptBW2TSKGg', '?””? ‰?„° ì§±êµ¬???””', '?Š¸?œ?“œ?— ë¯¼ê°?•œ ?‚¨? ì§±êµ¬???”” ?…?‹ˆ?‹¤! ???????????????????????? ?„¤?´ë²? ì¹´í˜ ?–· https://cafe.naver.com/zzang9daddy ?Š¸?œ„ì¹? ...', 214115847, 577000, 34 )
+INSERT INTO CHANNEL VALUES ('UCw-kXdzxMdMdLNI0ZlFFbmA', '?˜¤?Š˜?˜ ì£¼ìš°?¬', 'ë§¤ì£¼ ?ƒˆë¡œìš´ ì£¼ìš°?¬ë¥? ë§Œë‚˜?‹¤ ê·¼ë³¸?ˆ?Š” ì£¼ìš°?¬?˜ ?Œ¨?…˜?˜„?‹¤?Œ¨ì¹? ?œ ?Šœë¸? ë¹„ì¦ˆ?‹ˆ?Š¤ ë¬¸ì˜ todaywoojae@episodegroup.kr ...', 70958952, 743000, 35 )
+INSERT INTO CHANNEL VALUES ('UC8a6z7i9qypp9PqJ_0HhBrw', 'ê¹¡ìŠ¤???¼ë¦¬ìŠ¤?Š¸', 'ê´?ë¦¬í•˜?Š” ?‚¨? ?Š¤???¼ë¦¬ìŠ¤?Š¸ ''ê¹?'' ?…?‹ˆ?‹¤. ?Œ¨?…˜ê³? ?—¤?–´ ê´?ë¦¬ì— ë¯¸ì³ ?ˆ?œ¼ë©?, ?‚¨??— ê´??•œ ëª¨ë“ ê²ƒì„ ë¦¬ë·°?•˜ê³? ì§„ì‹¬?œ¼ë¡? ?˜?ƒ?„ ë§Œë“­?‹ˆ?‹¤.', 294458572, 1140000, 36 )
+INSERT INTO CHANNEL VALUES ('UCPKNKldggioffXPkSmjs5lQ', '[?–„ì§?]Hamzy', '??ë¦¬ë§Œì¡?1000%%% [?–„ì§?]Hamzy''s ë¨¹ë°© ?¤ ë¬¸ì˜ : hjh35550@gmail.com.', 3413574180, 10500000, 37 )
+INSERT INTO CHANNEL VALUES ('UCfpaSruWW3S4dibonKXENjA', 'tzuyangì¯”ì–‘', 'ë·°í‹°ê´?? ¨ ?˜‘ì°?(?™”?¥?’ˆ, ?„±?˜•?™¸ê³?, ?”¼ë¶?ê³? ?“±) ë°? ?‹¤?´?–´?Š¸ ? œ?’ˆêµ? ?˜‘ì°?(?•½,ë³´ì¡°? œ)?? ?¼? ˆ ì§„í–‰?•˜ì§? ?•Šê³? ?ˆ?Šµ?‹ˆ?‹¤. ?´ ë¶?ë¶? ?–‘?•´ ë¶??ƒ ...', 1509017987, 7180000, 38 )
+INSERT INTO CHANNEL VALUES ('UCA6KBBX8cLwYZNepxlE_7SA', '?ˆë°¥heebab', '?•ˆ?…•?•˜?„¸?š” ë¨¹ë°© ?¬ë¦¬ì—?´?„° ?ˆë°? ?…?‹ˆ?‹¤.', 462730668, 1380000, 39 )
+INSERT INTO CHANNEL VALUES ('UC-i2ywiuvjvpTy2zW-tXfkw', '?–µê°œë–µ', 'ddeonggae@sandboxnetwork.net.', 2866871131, 4820000, 40 )
+INSERT INTO CHANNEL VALUES ('UCZTavrg2A43lQMWxiK3yu7g', '?•œ?„¸ HANSE', '', 421868520, 2720000, 41 )
+INSERT INTO CHANNEL VALUES ('UCL01un1rw1MU3wj7-oEELQQ', '[?œ¤?´? ¨]50?…„ ?š”ë¦¬ë¹„ê²?', '?š”ë¦¬ì±„?„ Korean food Cooking ASMR ë¨¹ë°© Authentic Korean Recipes You can learn the best traditional home meals from Korean ...', 272667530, 901000, 42 )
+INSERT INTO CHANNEL VALUES ('UCr5Kww9xqzPmSJTHyXl58YQ', 'Mrs macaronsë§ˆì¹´ë¡±ì—¬?‚¬', '?‚¶?„ ? •?„±ê»? ?‚´?•„ë³´ê¸°.', 123635144, 624000, 43 )
+INSERT INTO CHANNEL VALUES ('UC0htUSwcxfSGNfK_5Q28JkA', '1ë¶„ìš”ë¦? ?š?”±?´?˜•', '?•œêµ??¸?´ ì¢‹ì•„?•˜?Š” ?¸ì§‘ì†?„?— ë§ì¶˜ 1ë¶„ìš”ë¦? ?˜?ƒ?„ ?—…ë¡œë“œ?•©?‹ˆ?‹¤.', 641155418, 1990000, 44 )
 INSERT INTO CHANNEL VALUES ('UCt15X5eHLwyP8PpNtQTkuDQ', 'Official Dopa', 'Hello, welcome to the Official Channel for DOPA (Notice - For Western fans!) Unfortunately, subtitles are not provided for every ...', 356240200, 674000, 45 )
-INSERT INTO CHANNEL VALUES ('UCD2YO_A_PVMgMDN9jpRrpVA', 'ë„ë¡œ', 'ë„íŠœë¸ŒëŠ” ë°©ì†¡ ì¤‘ ì•¡ê¸°ìŠ¤ë§Œ ì«™ ë½‘ì•„ ì˜¬ë¦½ë‹ˆë‹¤. ë¹„ì§€ë‹ˆìŠ¤ : aba060847@gmail.com.', 437096355, 969000, 46 )
+INSERT INTO CHANNEL VALUES ('UCD2YO_A_PVMgMDN9jpRrpVA', '?„ë¡?', '?„?Šœë¸ŒëŠ” ë°©ì†¡ ì¤? ?•¡ê¸°ìŠ¤ë§? ì«? ë½‘ì•„ ?˜¬ë¦½ë‹ˆ?‹¤. ë¹„ì??‹ˆ?Š¤ : aba060847@gmail.com.', 437096355, 969000, 46 )
 INSERT INTO CHANNEL VALUES ('UCJpAwvQaZyCI5spAz7tipGA', 'PAKA', '', 401074192, 590000, 47 )
-INSERT INTO CHANNEL VALUES ('UCDBAVzfX3yZ1hah0FHnOoaA', 'ê´´ë¬¼ì¥ ìœ íŠœë¸Œ', 'ì¹´ë¡ ì†Œì† í¬ë¦¬ì—ì´í„° ê´´ë¬¼ì¥ì˜ ìœ íŠœë¸Œ ì…ë‹ˆë‹¤ ë¹„ì¦ˆë‹ˆìŠ¤ ë¬¸ì˜ - charon@gysent.com.', 903789988, 1010000, 48 )
-INSERT INTO CHANNEL VALUES ('UCuFGPhfJlIngZaC2BjLaJdQ', 'ê¹€ì†Œí˜• ì±„ë„H', 'ê¹€ì†Œí˜• í•œì˜ì‚¬ì˜ í•œì˜í•™ ì´ì•¼ê¸°! ì „ë¬¸ ì§€ì‹ë¶€í„° ì¼ë°˜ì¸ë„ í™œìš©í•  ìˆ˜ ìˆëŠ” í•œë°© íŒ ê¹Œì§€!! ê¹€ì†Œí˜•ì˜ ì±„ë„H(Ch. H) *ë³¸ ì±„ë„ì—ì„œ ì œê³µí•˜ëŠ” ...', 275915460, 1330000, 49 )
-INSERT INTO CHANNEL VALUES ('UCF9vbHlZpz7FbOAky3fnYxw', 'ì˜í•™ì±„ë„ ë¹„ì˜¨ë’¤', 'ë¹„ì˜¨ë’¤ëŠ” êµ­ë‚´ìµœì´ˆ ì˜í•™ì „ë¬¸ê¸°ìì¸ í™í˜œê±¸ ë°•ì‚¬ê°€ ë¶„ì•¼ë³„ ìµœê³ ì˜ ì˜ì‚¬ë“¤ê³¼ í•¨ê»˜ â€œì˜í•™ì´ ì¦ê²ë‹¤â€ë¥¼ ëª¨í† ë¡œ 2012ë…„ ì‹œì‘í•œ ì§€ì‹ë‚˜ëˆ” ...', 353505268, 1180000, 50 )
-INSERT INTO CHANNEL VALUES ('UCVfLNEch9YxD4tX1L-crkMQ', 'ë‹¥í„°í”„ë Œì¦ˆ', 'ë”±ë”±í•˜ê³  ì–´ë ¤ìš´ ì˜í•™ìƒë‹´ì€ ê·¸ë§Œí•˜ê³  ì´ì œ ë‹¥í”„í•˜ì„¸ìš”. ì˜¤ëœ ì‹œê°„ì„ í•¨ê»˜í•œ ì˜ì‚¬ ì¹œêµ¬ ì„¸ëª…ì´ ì´ì œëŠ” ë‹¹ì‹ ê³¼ ì¹œêµ¬ê°€ ë˜ê¸° ìœ„í•´ ì¹´ë©”ë¼ ...', 200178265, 878000, 32 )
-INSERT INTO CHANNEL VALUES ('UCnLrunxy9Ex0JWvm9HHa71w', 'ë‹¥í„°ì¡°ë¬¼ì£¼ ê½ˆì¶”í˜•', 'ì•ˆë…•í•˜ì„¸ìš”~ ë‹¥í„°ì¡°ë¬¼ì£¼ í™ì„±ìš° ì…ë‹ˆë‹¤. ì—¬ëŸ¬ë¶„ê³¼ ì†Œí†µí•˜ê³  ëŠ˜ ì—´ë¦° ìì„¸ë¥¼ ìœ ì§€í•˜ê¸° ìœ„í•´ ë§Œë“  ì±„ë„ì…ë‹ˆë‹¤.^^ ëŒ€í•œë¯¼êµ­ 1ë“± ë¹„ë‡¨ ...', 23070723, 182000, 18 )
-INSERT INTO CHANNEL VALUES ('UCYJDUekoQz0-bo8al1diLWQ', 'ë§ì™•TV', 'ì¦ê²ê²Œ ìš´ë™í•˜ëŠ” ê³ í’ˆê²© ìš´ë™ë°©ì†¡ ragoona88@gmail.com.', 384049318, 1010000, 44 )
-INSERT INTO CHANNEL VALUES ('UCoe-0EVDJnjlSoPK8ygcGwQ', 'ê¹€ì¢…êµ­ GYM JONG KOOK', 'ì•ˆë…•í•˜ì„¸ìš” ê¹€ì¢…êµ­.. ì•„ë‹ˆ GYM ì¢…êµ­ ã… ì…ë‹ˆë‹¤ ã… ìê²©ì¦ ì´ë¼ê³¤ ì´ ëª¸ë•¡ì´ ë¿ì¸ ã…ê·¸ëƒ¥ ìš´ë™ ì¢‹ì•„í•˜ê³  ì˜¤ë˜ í•œ ã… ë™ë„¤ ì•„ì €ì”¨ ã… ìš°ë¦¬ ...', 210839994, 2730000, 36 )
-INSERT INTO CHANNEL VALUES ('UCdtRAcd3L_UpV4tMXCw63NQ', 'í”¼ì§€ì»¬ê°¤ëŸ¬ë¦¬', 'ì¬ë°Œê³  ìœ ìµí•œ ì²´í˜•êµì •ê³¼ ì¬í™œ ì •ë³´ë¥¼ ì•Œë ¤ì£¼ëŠ” ë¹¡ë¹¡ì´ ì•„ì €ì”¨ë¥¼ ë³¼ ìˆ˜ ìˆëŠ” ì±„ë„. ì œê³µë˜ëŠ” ì •ë³´ë“¤ì€ ì˜í•™ì  ì§„ë‹¨, ì§„ë£Œ í˜¹ì€ ì¹˜ë£Œë¥¼ ...', 719700035, 3090000, 5 )
-INSERT INTO CHANNEL VALUES ('UCQ4eZwsMew7ZaV_HKXnQLGg', 'ì§€ê¸°TV', 'ëˆ„êµ¬ë‚˜ í• ìˆ˜ìˆë‹¤! ì§€ê¸° ì…ë‹ˆë‹¤! í—¬ìŠ¤, ìœ¡ì•„, ì¼ìƒ, ë¨¹ë°© ëª¨ë“ ì§€ ì¬ë°Œê³  ì¦ê²ê³  ì‹ ë‚˜ê²Œ!!!!!!!!!!!!', 237949593, 804000, 33 )
+INSERT INTO CHANNEL VALUES ('UCDBAVzfX3yZ1hah0FHnOoaA', 'ê´´ë¬¼ì¥? ?œ ?Šœë¸?', 'ì¹´ë¡ ?†Œ?† ?¬ë¦¬ì—?´?„° ê´´ë¬¼ì¥ì˜ ?œ ?Šœë¸? ?…?‹ˆ?‹¤ ë¹„ì¦ˆ?‹ˆ?Š¤ ë¬¸ì˜ - charon@gysent.com.', 903789988, 1010000, 48 )
+INSERT INTO CHANNEL VALUES ('UCuFGPhfJlIngZaC2BjLaJdQ', 'ê¹??†Œ?˜• ì±„ë„H', 'ê¹??†Œ?˜• ?•œ?˜?‚¬?˜ ?•œ?˜?•™ ?´?•¼ê¸?! ? „ë¬? ì§??‹ë¶??„° ?¼ë°˜ì¸?„ ?™œ?š©?•  ?ˆ˜ ?ˆ?Š” ?•œë°? ?Œ ê¹Œì?!! ê¹??†Œ?˜•?˜ ì±„ë„H(Ch. H) *ë³? ì±„ë„?—?„œ ? œê³µí•˜?Š” ...', 275915460, 1330000, 49 )
+INSERT INTO CHANNEL VALUES ('UCF9vbHlZpz7FbOAky3fnYxw', '?˜?•™ì±„ë„ ë¹„ì˜¨?’¤', 'ë¹„ì˜¨?’¤?Š” êµ??‚´ìµœì´ˆ ?˜?•™? „ë¬¸ê¸°??¸ ?™?˜œê±? ë°•ì‚¬ê°? ë¶„ì•¼ë³? ìµœê³ ?˜ ?˜?‚¬?“¤ê³? ?•¨ê»? ?œì˜?•™?´ ì¦ê²?‹¤?ë?? ëª¨í† ë¡? 2012?…„ ?‹œ?‘?•œ ì§??‹?‚˜?ˆ” ...', 353505268, 1180000, 50 )
+INSERT INTO CHANNEL VALUES ('UCVfLNEch9YxD4tX1L-crkMQ', '?‹¥?„°?”„? Œì¦?', '?”±?”±?•˜ê³? ?–´? ¤?š´ ?˜?•™?ƒ?‹´?? ê·¸ë§Œ?•˜ê³? ?´? œ ?‹¥?”„?•˜?„¸?š”. ?˜¤?œ ?‹œê°„ì„ ?•¨ê»˜í•œ ?˜?‚¬ ì¹œêµ¬ ?„¸ëª…ì´ ?´? œ?Š” ?‹¹?‹ ê³? ì¹œêµ¬ê°? ?˜ê¸? ?œ„?•´ ì¹´ë©”?¼ ...', 200178265, 878000, 32 )
+INSERT INTO CHANNEL VALUES ('UCnLrunxy9Ex0JWvm9HHa71w', '?‹¥?„°ì¡°ë¬¼ì£? ê½ˆì¶”?˜•', '?•ˆ?…•?•˜?„¸?š”~ ?‹¥?„°ì¡°ë¬¼ì£? ?™?„±?š° ?…?‹ˆ?‹¤. ?—¬?Ÿ¬ë¶„ê³¼ ?†Œ?†µ?•˜ê³? ?Š˜ ?—´ë¦? ??„¸ë¥? ?œ ì§??•˜ê¸? ?œ„?•´ ë§Œë“  ì±„ë„?…?‹ˆ?‹¤.^^ ???•œë¯¼êµ­ 1?“± ë¹„ë‡¨ ...', 23070723, 182000, 18 )
+INSERT INTO CHANNEL VALUES ('UCYJDUekoQz0-bo8al1diLWQ', 'ë§ì™•TV', 'ì¦ê²ê²? ?š´?™?•˜?Š” ê³ í’ˆê²? ?š´?™ë°©ì†¡ ragoona88@gmail.com.', 384049318, 1010000, 44 )
+INSERT INTO CHANNEL VALUES ('UCoe-0EVDJnjlSoPK8ygcGwQ', 'ê¹?ì¢…êµ­ GYM JONG KOOK', '?•ˆ?…•?•˜?„¸?š” ê¹?ì¢…êµ­.. ?•„?‹ˆ GYM ì¢…êµ­ ?… ?…?‹ˆ?‹¤ ?… ?ê²©ì¦ ?´?¼ê³? ?´ ëª¸ë•¡?´ ë¿ì¸ ?…ê·¸ëƒ¥ ?š´?™ ì¢‹ì•„?•˜ê³? ?˜¤?˜ ?•œ ?… ?™?„¤ ?•„???”¨ ?… ?š°ë¦? ...', 210839994, 2730000, 36 )
+INSERT INTO CHANNEL VALUES ('UCdtRAcd3L_UpV4tMXCw63NQ', '?”¼ì§?ì»¬ê°¤?Ÿ¬ë¦?', '?¬ë°Œê³  ?œ ?µ?•œ ì²´í˜•êµì •ê³? ?¬?™œ ? •ë³´ë?? ?•Œ? ¤ì£¼ëŠ” ë¹¡ë¹¡?´ ?•„???”¨ë¥? ë³? ?ˆ˜ ?ˆ?Š” ì±„ë„. ? œê³µë˜?Š” ? •ë³´ë“¤?? ?˜?•™?  ì§„ë‹¨, ì§„ë£Œ ?˜¹?? ì¹˜ë£Œë¥? ...', 719700035, 3090000, 5 )
+INSERT INTO CHANNEL VALUES ('UCQ4eZwsMew7ZaV_HKXnQLGg', 'ì§?ê¸°TV', '?ˆ„êµ¬ë‚˜ ?• ?ˆ˜?ˆ?‹¤! ì§?ê¸? ?…?‹ˆ?‹¤! ?—¬?Š¤, ?œ¡?•„, ?¼?ƒ, ë¨¹ë°© ëª¨ë“ ì§? ?¬ë°Œê³  ì¦ê²ê³? ?‹ ?‚˜ê²?!!!!!!!!!!!!', 237949593, 804000, 33 )
 INSERT INTO CHANNEL VALUES ('UCe52oeb7Xv_KaJsEzcKXJJg', 'MBCkpop', 'Welcome to the official YouTube page of MBC, MBC Kpop Enjoy "Show! Music Core" the hottest K-pop program and the essence ...', 8395882347, 10000000, 12 )
-INSERT INTO CHANNEL VALUES ('UCeLPm9yH_a_QH8n6445G-Ow', 'KBS Kpop', '[KBS í•œêµ­ë°©ì†¡] ìŒì•… ì „ë¬¸ ì±„ë„, KBS Kpop ì…ë‹ˆë‹¤. [KBS Korean Broadcasting System] Official Music Channel, KBS kpop.', 6225267778, 7300000, 27 )
-INSERT INTO CHANNEL VALUES ('UCS_hnpJLQTvBkqALgapi_4g', 'ìŠ¤ë¸ŒìŠ¤ì¼€ì´íŒ X INKIGAYO', '''ìŠ¤ë¸ŒìŠ¤ì¼€ì´íŒ/SBSKPOP''ì€ ê¸°ì¡´ì˜ Inkigayoì¸ê¸°ê°€ìš” ì±„ë„ì˜ í™•ì¥ ë²„ì „ìœ¼ë¡œ ìƒˆë¡­ê²Œ íƒœì–´ë‚œ SBS ê³µì‹ ë””ì§€í„¸ KPOPì±„ë„ì…ë‹ˆë‹¤.', 5331377028, 7040000, 13 )
-INSERT INTO CHANNEL VALUES ('UCepUWUpH45hRTi-QePdq1Bg', 'Mnet TV', 'ë‹¤ì–‘í•œ ìŒì•… ì˜ˆëŠ¥ìœ¼ë¡œ ì¦ê±°ì›€ì„ ì„ ì‚¬í•˜ëŠ” Mnet ìŒì•… ë²„ë¼ì´ì–´í‹° ê³µì‹ ì±„ë„ "Mnet TV  " cCJ ENM. Corp ALL RIGHTS RESERVED.', 11033654259, 8930000, 35 )
-INSERT INTO CHANNEL VALUES ('UCcQTRi69dsVYHN3exePtZ1A', 'KBS News', 'ì–¸ì œ, ì–´ë””ì„œë‚˜ KBS ë‰´ìŠ¤.', 3301187200, 1920000, 17 )
-INSERT INTO CHANNEL VALUES ('UCkinYTS9IHqOEwR1Sze2JTw', 'SBS ë‰´ìŠ¤', 'ë²•ì œì‚¬ë²•ìœ„ì›íšŒ #êµ­ì •ê°ì‚¬ #êµ­íšŒ #ë²•ë¬´ë¶€ #í•œë™í›ˆ #ê°ì‚¬ì› #ì´ì¬ëª… #ë¯¼ì£¼ë‹¹ #ë¯¼ì£¼ì—°êµ¬ì› #ì••ìˆ˜ìˆ˜ìƒ‰ #SBSë‰´ìŠ¤ #8ë‰´ìŠ¤ #ì‹¤ì‹œê°„ ...', 5226907949, 2990000, 40 )
-INSERT INTO CHANNEL VALUES ('UCsU-I-vHLiaMfV_ceaYz5rQ', 'JTBC News', 'JTBC ë‰´ìŠ¤ ê³µì‹ ìœ íŠœë¸Œ ì±„ë„ Welcome to the official JTBC News Channel. Easy and Fun news channel 15! You will find the faster ...', 5297114594, 2550000, 24 )
-INSERT INTO CHANNEL VALUES ('UChlgI3UHCOnwUGzWzbJ3H5w', 'YTN', '24ì‹œê°„ ìƒì¤‘ê³„ë˜ëŠ” ëŒ€í•œë¯¼êµ­ ëŒ€í‘œ ë‰´ìŠ¤ YTN ê³µì‹ì±„ë„ì„ ì§€ê¸ˆ ë°”ë¡œ êµ¬ë…í•˜ì„¸ìš” â–· êµ¬ë…í•˜ê¸° : http://goo.gl/Ytb5SZ â–· YTN ê¸°ì‚¬ì œë³´ ...', 9257317565, 3600000, 12 )
-INSERT INTO CHANNEL VALUES ('UCq0pVPNYdDWQk1iTS4jTk2w', 'ë¸Œë¦¿ì„¼íŠ¸ x ì˜êµ­ì˜ì–´', 'ì „ë¬¸ ì˜êµ­ì¸ íŠœí„°ì™€ í•¨ê»˜í•˜ëŠ” í”„ë¦¬ë¯¸ì—„ 1:1 ì˜ì–´ ìˆ˜ì—… ì˜êµ­ ìµœê³ ì˜ ì˜êµ­ì¸ ì˜ì–´ ì„ ìƒë‹˜ë“¤ê³¼ í•¨ê»˜í•©ë‹ˆë‹¤. ë¸Œë¦¿ì„¼íŠ¸ì™€ í•¨ê»˜ ë©‹ì§„ ì˜êµ­ ...', 23256890, 393000, 40 )
-INSERT INTO CHANNEL VALUES ('UCG1yCJ0i5iAH1lixElahYUw', 'ì½”ë¹¨ê°„ë°°ì¶˜ê¸° [ë°°ì„±ì¬ì˜ í…]', 'ì•ˆë…•í•˜ì„¸ìš”! SBS ë¼ë””ì˜¤ ê³µì‹ íŒŒíŠ¸ë„ˆ ì±„ë„ ì…ë‹ˆë‹¤. êµ¬ë…ê³¼ ì¢‹ì•„ìš”, ì•ŒëŒì„¤ì •ì„ í•˜ì‹œë©´ ìƒë…¹ë°©ê³¼ ë³´ëŠ” ë¼ë””ì˜¤ ì‹œì²­ì´ ê°„í¸í•´ì§€ì‹¤ ...', 170325703, 131000, 1 )
-INSERT INTO CHANNEL VALUES ('UCAmff0euQRf6RwVlbB8PLMw', 'SBS Radio ì—ë¼ì˜¤', 'SBS Radio Official ìœ íŠœë¸Œ ì±„ë„ ã€ˆì—ë¼ì˜¤ã€‰ì…ë‹ˆë‹¤! SBS ë¼ë””ì˜¤ í”„ë¡œê·¸ë¨ì˜ ì—ë¼ì˜¤í”½, í’€ë²„ì „, ë¼ì´ë¸Œ, í•˜ì´ë¼ì´íŠ¸ ë“±ì„ ì œê³µí•©ë‹ˆë‹¤.', 641451591, 1160000, 17 )
-INSERT INTO CHANNEL VALUES ('UCwRljhjVWtLqAKbsWGPU_OA', 'YTN ë¼ë””ì˜¤', 'YTN NEWS FMì€ ëŒ€í•œë¯¼êµ­ ìµœì´ˆì˜ ë³´ë„ì „ë¬¸ FM ì±„ë„ì…ë‹ˆë‹¤. FM 94.5Mhz ë¥¼ í†µí•´ ì–¸ì œë“ ì§€ ë¹ ë¥´ê³  ì •í™•í•œ ë‰´ìŠ¤ë¥¼ ë“¤ìœ¼ì‹¤ ìˆ˜ ...', 179275688, 378000, 27 )
-INSERT INTO CHANNEL VALUES ('UCnXNukjRxXGD8aeZGRV-lYg', 'ìŠ¤í¬ì¸ íƒ€ì„', '''ìŠ¤í¬ì¸ íƒ€ì„(SPORTSTIME)''ì€ SPOTVì˜ ì˜ìƒ ì½˜í…ì¸  ë¸Œëœë“œì…ë‹ˆë‹¤. #í˜„ì¥ìŠ¤ì¼€ì¹˜ #ì „ë¬¸ê°€ë¶„ì„ #í˜„ì§€í•´ì„¤ #ì„ ìˆ˜ì¸í„°ë·° SPOTV, ...', 722166509, 427000, 24 )
-INSERT INTO CHANNEL VALUES ('UC2emKV0kcPDKNl9EtDm4Ubg', 'í”„ë¡œë™ë„¤ì•¼êµ¬ PDB', 'í”„ë¡œì•¼êµ¬ê°€ ì¶œë²”í–ˆë˜ ì›ë…„ì˜ ìºì¹˜í”„ë ˆì´ì¦ˆ! ê·¸ê²ƒì€ ë°”ë¡œ "ì–´ë¦°ì´ì—ê²Œ ê¿ˆì„, ì Šì€ì´ì—ê²Œ ë‚­ë§Œì„! " ì „êµ­ì˜ ëª¨ë“  ë™ë„¤ì—ì„œ í™ˆëŸ°ê³¼ ì‚¼ì§„ ì½œ ...', 368938352, 281000, 28 )
-INSERT INTO CHANNEL VALUES ('UCdTDdygpZKdDew2s1s419iw', 'ìŠ›í¬ëŸ¬ë¸Œ', 'ì¶•êµ¬ê°€ ê³¼ì—° ì„¸ìƒì„ ë°”ê¿€ ìˆ˜ ìˆì„ê¹Œìš”? ìŠ›í¬ëŸ¬ë¸ŒëŠ” 1. ìµœê³ ì˜ ìŠ¤í¬ì¸  ì½˜í…ì¸ ë¥¼ ë§Œë“¤ì–´ ì‹œì²­ìë“¤ì—ê²Œ ì¦ê±°ì›€ì„ ì„ ì‚¬í•©ë‹ˆë‹¤ 2. ë‹¨ìˆœíˆ ...', 800355624, 1340000, 33 )
+INSERT INTO CHANNEL VALUES ('UCeLPm9yH_a_QH8n6445G-Ow', 'KBS Kpop', '[KBS ?•œêµ?ë°©ì†¡] ?Œ?•… ? „ë¬? ì±„ë„, KBS Kpop ?…?‹ˆ?‹¤. [KBS Korean Broadcasting System] Official Music Channel, KBS kpop.', 6225267778, 7300000, 27 )
+INSERT INTO CHANNEL VALUES ('UCS_hnpJLQTvBkqALgapi_4g', '?Š¤ë¸ŒìŠ¤ì¼??´?Œ X INKIGAYO', '''?Š¤ë¸ŒìŠ¤ì¼??´?Œ/SBSKPOP''?? ê¸°ì¡´?˜ Inkigayo?¸ê¸°ê??š” ì±„ë„?˜ ?™•?¥ ë²„ì „?œ¼ë¡? ?ƒˆë¡?ê²? ?ƒœ?–´?‚œ SBS ê³µì‹ ?””ì§??„¸ KPOPì±„ë„?…?‹ˆ?‹¤.', 5331377028, 7040000, 13 )
+INSERT INTO CHANNEL VALUES ('UCepUWUpH45hRTi-QePdq1Bg', 'Mnet TV', '?‹¤?–‘?•œ ?Œ?•… ?˜ˆ?Š¥?œ¼ë¡? ì¦ê±°???„ ?„ ?‚¬?•˜?Š” Mnet ?Œ?•… ë²„ë¼?´?–´?‹° ê³µì‹ ì±„ë„ "Mnet TV  " cCJ ENM. Corp ALL RIGHTS RESERVED.', 11033654259, 8930000, 35 )
+INSERT INTO CHANNEL VALUES ('UCcQTRi69dsVYHN3exePtZ1A', 'KBS News', '?–¸? œ, ?–´?””?„œ?‚˜ KBS ?‰´?Š¤.', 3301187200, 1920000, 17 )
+INSERT INTO CHANNEL VALUES ('UCkinYTS9IHqOEwR1Sze2JTw', 'SBS ?‰´?Š¤', 'ë²•ì œ?‚¬ë²•ìœ„?›?šŒ #êµ?? •ê°ì‚¬ #êµ??šŒ #ë²•ë¬´ë¶? #?•œ?™?›ˆ #ê°ì‚¬?› #?´?¬ëª? #ë¯¼ì£¼?‹¹ #ë¯¼ì£¼?—°êµ¬ì› #?••?ˆ˜?ˆ˜?ƒ‰ #SBS?‰´?Š¤ #8?‰´?Š¤ #?‹¤?‹œê°? ...', 5226907949, 2990000, 40 )
+INSERT INTO CHANNEL VALUES ('UCsU-I-vHLiaMfV_ceaYz5rQ', 'JTBC News', 'JTBC ?‰´?Š¤ ê³µì‹ ?œ ?Šœë¸? ì±„ë„ Welcome to the official JTBC News Channel. Easy and Fun news channel 15! You will find the faster ...', 5297114594, 2550000, 24 )
+INSERT INTO CHANNEL VALUES ('UChlgI3UHCOnwUGzWzbJ3H5w', 'YTN', '24?‹œê°? ?ƒì¤‘ê³„?˜?Š” ???•œë¯¼êµ­ ???‘œ ?‰´?Š¤ YTN ê³µì‹ì±„ë„?„ ì§?ê¸? ë°”ë¡œ êµ¬ë…?•˜?„¸?š” ?–· êµ¬ë…?•˜ê¸? : http://goo.gl/Ytb5SZ ?–· YTN ê¸°ì‚¬? œë³? ...', 9257317565, 3600000, 12 )
+INSERT INTO CHANNEL VALUES ('UCq0pVPNYdDWQk1iTS4jTk2w', 'ë¸Œë¦¿?„¼?Š¸ x ?˜êµ??˜?–´', '? „ë¬? ?˜êµ??¸ ?Šœ?„°?? ?•¨ê»˜í•˜?Š” ?”„ë¦¬ë?¸ì—„ 1:1 ?˜?–´ ?ˆ˜?—… ?˜êµ? ìµœê³ ?˜ ?˜êµ??¸ ?˜?–´ ?„ ?ƒ?‹˜?“¤ê³? ?•¨ê»˜í•©?‹ˆ?‹¤. ë¸Œë¦¿?„¼?Š¸?? ?•¨ê»? ë©‹ì§„ ?˜êµ? ...', 23256890, 393000, 40 )
+INSERT INTO CHANNEL VALUES ('UCG1yCJ0i5iAH1lixElahYUw', 'ì½”ë¹¨ê°„ë°°ì¶˜ê¸° [ë°°ì„±?¬?˜ ?…]', '?•ˆ?…•?•˜?„¸?š”! SBS ?¼?””?˜¤ ê³µì‹ ?ŒŒ?Š¸?„ˆ ì±„ë„ ?…?‹ˆ?‹¤. êµ¬ë…ê³? ì¢‹ì•„?š”, ?•Œ?Œ?„¤? •?„ ?•˜?‹œë©? ?ƒ?…¹ë°©ê³¼ ë³´ëŠ” ?¼?””?˜¤ ?‹œì²??´ ê°„í¸?•´ì§??‹¤ ...', 170325703, 131000, 1 )
+INSERT INTO CHANNEL VALUES ('UCAmff0euQRf6RwVlbB8PLMw', 'SBS Radio ?—?¼?˜¤', 'SBS Radio Official ?œ ?Šœë¸? ì±„ë„ ?ˆì—?¼?˜¤?‰ì…?‹ˆ?‹¤! SBS ?¼?””?˜¤ ?”„ë¡œê·¸?¨?˜ ?—?¼?˜¤?”½, ??ë²„ì „, ?¼?´ë¸?, ?•˜?´?¼?´?Š¸ ?“±?„ ? œê³µí•©?‹ˆ?‹¤.', 641451591, 1160000, 17 )
+INSERT INTO CHANNEL VALUES ('UCwRljhjVWtLqAKbsWGPU_OA', 'YTN ?¼?””?˜¤', 'YTN NEWS FM?? ???•œë¯¼êµ­ ìµœì´ˆ?˜ ë³´ë„? „ë¬? FM ì±„ë„?…?‹ˆ?‹¤. FM 94.5Mhz ë¥? ?†µ?•´ ?–¸? œ?“ ì§? ë¹ ë¥´ê³? ? •?™•?•œ ?‰´?Š¤ë¥? ?“¤?œ¼?‹¤ ?ˆ˜ ...', 179275688, 378000, 27 )
+INSERT INTO CHANNEL VALUES ('UCnXNukjRxXGD8aeZGRV-lYg', '?Š¤?¬ì¸ í??„', '''?Š¤?¬ì¸ í??„(SPORTSTIME)''?? SPOTV?˜ ?˜?ƒ ì½˜í…ì¸? ë¸Œëœ?“œ?…?‹ˆ?‹¤. #?˜„?¥?Š¤ì¼?ì¹? #? „ë¬¸ê?ë¶„ì„ #?˜„ì§??•´?„¤ #?„ ?ˆ˜?¸?„°ë·? SPOTV, ...', 722166509, 427000, 24 )
+INSERT INTO CHANNEL VALUES ('UC2emKV0kcPDKNl9EtDm4Ubg', '?”„ë¡œë™?„¤?•¼êµ? PDB', '?”„ë¡œì•¼êµ¬ê? ì¶œë²”?–ˆ?˜ ?›?…„?˜ ìºì¹˜?”„? ˆ?´ì¦?! ê·¸ê²ƒ?? ë°”ë¡œ "?–´ë¦°ì´?—ê²? ê¿ˆì„, ? Š???´?—ê²? ?‚­ë§Œì„! " ? „êµ??˜ ëª¨ë“  ?™?„¤?—?„œ ?™ˆ?Ÿ°ê³? ?‚¼ì§? ì½? ...', 368938352, 281000, 28 )
+INSERT INTO CHANNEL VALUES ('UCdTDdygpZKdDew2s1s419iw', '?Š›?¬?Ÿ¬ë¸?', 'ì¶•êµ¬ê°? ê³¼ì—° ?„¸?ƒ?„ ë°”ê? ?ˆ˜ ?ˆ?„ê¹Œìš”? ?Š›?¬?Ÿ¬ë¸ŒëŠ” 1. ìµœê³ ?˜ ?Š¤?¬ì¸? ì½˜í…ì¸ ë?? ë§Œë“¤?–´ ?‹œì²???“¤?—ê²? ì¦ê±°???„ ?„ ?‚¬?•©?‹ˆ?‹¤ 2. ?‹¨?ˆœ?ˆ ...', 800355624, 1340000, 33 )
 INSERT INTO CHANNEL VALUES ('UCtm_QoN2SIxwCE-59shX7Qg', 'SPOTV', '', 1455405514, 1810000, 27 )
-INSERT INTO CHANNEL VALUES ('UCdUcjkyZtf-1WJyPPiETF1g', 'ITSubì‡ì„­', 'ê¶ê¸ˆí•œ ê²ƒì€ ì ˆëŒ€ ëª»ì°¸ëŠ” í…Œí¬ í¬ë¦¬ì—ì´í„° ì‡ì„­(ITSub)ì…ë‹ˆë‹¤. í…Œí¬ì— ê´€ë ¨ëœ, ê´€ì‹¬ìˆëŠ” ê²ƒì€ ë¬´ì—‡ì´ë“  ë¦¬ë·°í•©ë‹ˆë‹¤ #ì „ìê¸°ê¸° #ITì´ìŠˆ ...', 816731737, 2240000, 1 )
-INSERT INTO CHANNEL VALUES ('UCFX6adXoyQKxft933NB3rmA', 'í…Œí¬ëª½ Techmong', 'ITì™€ Carë¥¼ Knowí•˜ê²Œ í•´ ì£¼ëŠ” ì•„ì´í‹°ì¹´ë…¸(ITCarKnow)ì˜ í…Œí¬ëª½ ì±„ë„ì…ë‹ˆë‹¤. ìŠ¤ë§ˆíŠ¸í°, íƒœë¸”ë¦¿, ê°€ì „ì œí’ˆ ë“±ì˜ ITì •ë³´ì™€ ì‹¤ìƒí™œì— ...', 104967628, 608000, 43 )
-INSERT INTO CHANNEL VALUES ('UC_0oo0GPlDUU88ubLDnJkSQ', 'UNDERkg', 'ITê¸°ê¸° ì „ë¬¸ ë¦¬ë·° ì‚¬ì´íŠ¸ underkg.comì˜ ê³µì‹ YouTube ì±„ë„ì…ë‹ˆë‹¤. ì˜ìƒ ì™¸ì˜ ìì„¸í•œ ì‚¬ì§„ ë° ë¦¬ë·°ëŠ” underkg.com í™ˆí˜ì´ì§€ì—ì„œ ...', 400628584, 683000, 36 )
-INSERT INTO CHANNEL VALUES ('UCJiv3w22pf4Cgpwxo70MbhQ', 'ëˆˆìŸì´', 'ì•ˆë…•í•˜ì„¸ìš”. ì¦ê²œìœ ì € ëˆˆìŸì´ì…ë‹ˆë‹¹.', 291444865, 647000, 25 )
-INSERT INTO CHANNEL VALUES ('UC3SyT4_WLHzN7JmHQwKQZww', 'ì´ì§€ê¸ˆ [IU Official]', 'ì•„ì´ìœ (IU) Official YouTube Channel.', 1761989535, 8180000, 28 )
-INSERT INTO CHANNEL VALUES ('UCoQy2wS5aiKCk-rUXiLS-vQ', 'í† ëª¨í† ëª¨TomoTomo', 'ì•ˆë…•í•˜ì„¸ìš” í•œì¼ì»¤í”Œ í† ëª¨í† ëª¨ì…ë‹ˆë‹¤ â™¥ ã“ã‚“ã«ã¡ã¯ï¼æ—¥éŸ“ã‚«ãƒƒãƒ—ãƒ«ã®ãƒˆãƒ¢ãƒˆãƒ¢ã§ã™ï½', 197646878, 1040000, 21 )
-INSERT INTO CHANNEL VALUES ('UC8TxOmxwC8QpHRZra7sOFig', 'ê°€ìš”ì´ í‚¤ìš°ê¸° YoiKi', '[ ë³¸ê²© ì—¬ìì¹œêµ¬ ê´€ì°° ë¸Œì´ë¡œê·¸! ] ì´ í—˜í•˜ê³  ìš°ìš¸í•œ ì„¸ìƒì„ í–‰ë³µí•˜ê²Œ ë°”ë¼ë³´ëŠ” ê°€ìš”ì´ë¥¼ ë‹´ëŠ” ì±„ë„ì…ë‹ˆë‹¤! ê°ì‚¬í•©ë‹ˆë‹¤!', 211303196, 587000, 41 )
-INSERT INTO CHANNEL VALUES ('UCj-durTg1W7uWsB8oq0u7kA', 'ì—”ì¡°ì´ì»¤í”Œenjoycouple', 'ê°œê·¸ë§¨ì»¤í”Œ ì†ë¯¼ìˆ˜&ì„ë¼ë¼ì˜ ëŒ€í™˜ì¥ ì—°ì• ì´ì•¼ê¸°â¤ ì¬ìƒëª©ë¡ì„ í´ë¦­í•˜ì‹œë©´ ì—”ì¡°ì´ì»¤í”Œ ì˜ìƒì„ ë³´ë‹¤ ì‰½ê²Œ ì •ì£¼í–‰í•˜ì‹¤ ìˆ˜ ìˆìŠµë‹ˆë‹¤^^ ...', 936319072, 2250000, 28 )
-INSERT INTO CHANNEL VALUES ('UC7F6UDq3gykPZHWRhrj_BDw', 'ì‚¬ë¬¼ê¶ì´ ì¡í•™ì§€ì‹', 'ì‚¬ë¬¼ê¶ì´ëŠ” ì‚¬ì†Œí•´ì„œ ë¬¼ì–´ë³´ì§€ ëª»í–ˆì§€ë§Œ ê¶ê¸ˆí–ˆë˜ ì´ì•¼ê¸°ì˜ ì¤€ë§ì…ë‹ˆë‹¤. - 2015ë…„ ''ìŠ¤í”¼ë“œì›¨ê±´''ì´ë¼ëŠ” í•„ëª…ìœ¼ë¡œ í˜ì´ìŠ¤ë¶ í˜ì´ì§€ ...', 271565584, 1510000, 34 )
-INSERT INTO CHANNEL VALUES ('UCMc4EmuDxnHPc6pgGW-QWvQ', 'ì•ˆë ê³¼í•™ Unrealscience', 'ê³¼í•™ì˜ ëŒ€ì¤‘í™”ë¥¼ ìœ„í•´ ë°•ì‚¬ê¸‰ ì•„ì¬ë“¤ì´ ì§ì ‘ ë§Œë“ , ë  ê³¼í•™ â€œì•ˆë  ê³¼í•™â€ ë‹¤ ë§Œë“œëŠ” ë³¸ê²© ê³¼í•™ ì±„ë„ *ì•ˆë ê³¼í•™ ì½˜í…ì¸  ì¹´í…Œê³ ë¦¬ - ë©”ì´ì € ...', 69231799, 640000, 14 )
-INSERT INTO CHANNEL VALUES ('UCrBpV_pG2kyMMEHCMTNzjAQ', 'ë¦¬ë·°ì—‰ì´: Owl''s Review', 'ê³¼í•™ê³¼ ì˜í™”ê°€ ì¤‘ì²©ë˜ì–´ ìˆëŠ” ìœ íŠœë²„ ë¦¬ë·°ì—‰ì´. ë¹„ì¦ˆë‹ˆìŠ¤ ë¬¸ì˜ - owls@bigleague.kr.', 390121006, 1280000, 26 )
-INSERT INTO CHANNEL VALUES ('UCIk1-yPCTnFuzfgu4gyfWqw', 'ê³¼í•™ë“œë¦¼ [Science Dream]', 'ê³¼í•™ìœ¼ë¡œ ì¬ë¯¸ì™€ ì§€ì‹ì„ ë”í•´ ë“œë¦¬ëŠ” ì±„ë„ì…ë‹ˆë‹¤. í•œ ë•ŒëŠ” ê³¼í•™ì„ ì¢‹ì•„í–ˆë˜, ì§€ê¸ˆë„ ê³¼í•™ì„ ì¢‹ì•„í•˜ëŠ”, ê·¸ë¦¬ê³  ì•ìœ¼ë¡œ ê³¼í•™ì„ ì¢‹ì•„í•  ...', 161542286, 865000, 27 )
+INSERT INTO CHANNEL VALUES ('UCdUcjkyZtf-1WJyPPiETF1g', 'ITSub?‡?„­', 'ê¶ê¸ˆ?•œ ê²ƒì? ? ˆ?? ëª»ì°¸?Š” ?…Œ?¬ ?¬ë¦¬ì—?´?„° ?‡?„­(ITSub)?…?‹ˆ?‹¤. ?…Œ?¬?— ê´?? ¨?œ, ê´??‹¬?ˆ?Š” ê²ƒì? ë¬´ì—‡?´?“  ë¦¬ë·°?•©?‹ˆ?‹¤ #? „?ê¸°ê¸° #IT?´?Šˆ ...', 816731737, 2240000, 1 )
+INSERT INTO CHANNEL VALUES ('UCFX6adXoyQKxft933NB3rmA', '?…Œ?¬ëª? Techmong', 'IT?? Carë¥? Know?•˜ê²? ?•´ ì£¼ëŠ” ?•„?´?‹°ì¹´ë…¸(ITCarKnow)?˜ ?…Œ?¬ëª? ì±„ë„?…?‹ˆ?‹¤. ?Š¤ë§ˆíŠ¸?°, ?ƒœë¸”ë¦¿, ê°?? „? œ?’ˆ ?“±?˜ IT? •ë³´ì? ?‹¤?ƒ?™œ?— ...', 104967628, 608000, 43 )
+INSERT INTO CHANNEL VALUES ('UC_0oo0GPlDUU88ubLDnJkSQ', 'UNDERkg', 'ITê¸°ê¸° ? „ë¬? ë¦¬ë·° ?‚¬?´?Š¸ underkg.com?˜ ê³µì‹ YouTube ì±„ë„?…?‹ˆ?‹¤. ?˜?ƒ ?™¸?˜ ??„¸?•œ ?‚¬ì§? ë°? ë¦¬ë·°?Š” underkg.com ?™ˆ?˜?´ì§??—?„œ ...', 400628584, 683000, 36 )
+INSERT INTO CHANNEL VALUES ('UCJiv3w22pf4Cgpwxo70MbhQ', '?ˆˆ?Ÿ?´', '?•ˆ?…•?•˜?„¸?š”. ì¦ê²œ?œ ?? ?ˆˆ?Ÿ?´?…?‹ˆ?‹¹.', 291444865, 647000, 25 )
+INSERT INTO CHANNEL VALUES ('UC3SyT4_WLHzN7JmHQwKQZww', '?´ì§?ê¸? [IU Official]', '?•„?´?œ (IU) Official YouTube Channel.', 1761989535, 8180000, 28 )
+INSERT INTO CHANNEL VALUES ('UCoQy2wS5aiKCk-rUXiLS-vQ', '?† ëª¨í† ëª¨TomoTomo', '?•ˆ?…•?•˜?„¸?š” ?•œ?¼ì»¤í”Œ ?† ëª¨í† ëª¨ì…?‹ˆ?‹¤ ?™¥ ?“?‚“?«?¡?¯ï¼æ—¥?Ÿ“?‚«?ƒƒ?ƒ—?ƒ«?®?ƒˆ?ƒ¢?ƒˆ?ƒ¢?§?™ï½?', 197646878, 1040000, 21 )
+INSERT INTO CHANNEL VALUES ('UC8TxOmxwC8QpHRZra7sOFig', 'ê°??š”?´ ?‚¤?š°ê¸? YoiKi', '[ ë³¸ê²© ?—¬?ì¹œêµ¬ ê´?ì°? ë¸Œì´ë¡œê·¸! ] ?´ ?—˜?•˜ê³? ?š°?š¸?•œ ?„¸?ƒ?„ ?–‰ë³µí•˜ê²? ë°”ë¼ë³´ëŠ” ê°??š”?´ë¥? ?‹´?Š” ì±„ë„?…?‹ˆ?‹¤! ê°ì‚¬?•©?‹ˆ?‹¤!', 211303196, 587000, 41 )
+INSERT INTO CHANNEL VALUES ('UCj-durTg1W7uWsB8oq0u7kA', '?—”ì¡°ì´ì»¤í”Œenjoycouple', 'ê°œê·¸ë§¨ì»¤?”Œ ?†ë¯¼ìˆ˜&?„?¼?¼?˜ ???™˜?¥ ?—°?• ?´?•¼ê¸°â¤ ?¬?ƒëª©ë¡?„ ?´ë¦??•˜?‹œë©? ?—”ì¡°ì´ì»¤í”Œ ?˜?ƒ?„ ë³´ë‹¤ ?‰½ê²? ? •ì£¼í–‰?•˜?‹¤ ?ˆ˜ ?ˆ?Šµ?‹ˆ?‹¤^^ ...', 936319072, 2250000, 28 )
+INSERT INTO CHANNEL VALUES ('UC7F6UDq3gykPZHWRhrj_BDw', '?‚¬ë¬¼ê¶?´ ?¡?•™ì§??‹', '?‚¬ë¬¼ê¶?´?Š” ?‚¬?†Œ?•´?„œ ë¬¼ì–´ë³´ì? ëª»í–ˆì§?ë§? ê¶ê¸ˆ?–ˆ?˜ ?´?•¼ê¸°ì˜ ì¤?ë§ì…?‹ˆ?‹¤. - 2015?…„ ''?Š¤?”¼?“œ?›¨ê±?''?´?¼?Š” ?•„ëª…ìœ¼ë¡? ?˜?´?Š¤ë¶? ?˜?´ì§? ...', 271565584, 1510000, 34 )
+INSERT INTO CHANNEL VALUES ('UCMc4EmuDxnHPc6pgGW-QWvQ', '?•ˆ? ê³¼í•™ Unrealscience', 'ê³¼í•™?˜ ??ì¤‘í™”ë¥? ?œ„?•´ ë°•ì‚¬ê¸? ?•„?¬?“¤?´ ì§ì ‘ ë§Œë“ , ?  ê³¼í•™ ?œì•ˆ?  ê³¼í•™?? ?‹¤ ë§Œë“œ?Š” ë³¸ê²© ê³¼í•™ ì±„ë„ *?•ˆ? ê³¼í•™ ì½˜í…ì¸? ì¹´í…Œê³ ë¦¬ - ë©”ì´?? ...', 69231799, 640000, 14 )
+INSERT INTO CHANNEL VALUES ('UCrBpV_pG2kyMMEHCMTNzjAQ', 'ë¦¬ë·°?—‰?´: Owl''s Review', 'ê³¼í•™ê³? ?˜?™”ê°? ì¤‘ì²©?˜?–´ ?ˆ?Š” ?œ ?Šœë²? ë¦¬ë·°?—‰?´. ë¹„ì¦ˆ?‹ˆ?Š¤ ë¬¸ì˜ - owls@bigleague.kr.', 390121006, 1280000, 26 )
+INSERT INTO CHANNEL VALUES ('UCIk1-yPCTnFuzfgu4gyfWqw', 'ê³¼í•™?“œë¦? [Science Dream]', 'ê³¼í•™?œ¼ë¡? ?¬ë¯¸ì? ì§??‹?„ ?”?•´ ?“œë¦¬ëŠ” ì±„ë„?…?‹ˆ?‹¤. ?•œ ?•Œ?Š” ê³¼í•™?„ ì¢‹ì•„?–ˆ?˜, ì§?ê¸ˆë„ ê³¼í•™?„ ì¢‹ì•„?•˜?Š”, ê·¸ë¦¬ê³? ?•?œ¼ë¡? ê³¼í•™?„ ì¢‹ì•„?•  ...', 161542286, 865000, 27 )
 INSERT INTO CHANNEL VALUES ('UCw8ZhLPdQ0u_Y-TLKd61hGA', '1MILLION Dance Studio', 'South Korea, Seoul 1MILLION Dance Studio.', 7520006102, 25700000, 41 )
 INSERT INTO CHANNEL VALUES ('UC3LIEPioeH0CmVCmCn4JS1g', 'VIVA DANCE STUDIO', 'Website http://viva-dancestudio.com Instagram @viva_dance_studio @viva_dance_studio_2003 E-mail ...', 410127779, 2260000, 44 )
-INSERT INTO CHANNEL VALUES ('UC2KEmFk5uE9bYvxoHuUFH5g', 'ë•¡ê¹¡DanceKang', 'í•˜ì´ë£¨ë£¨.', 287062306, 633000, 15 )
-INSERT INTO CHANNEL VALUES ('UC2jHhn8GMouSKUiauOsiR3w', 'Aikiì•„ì´í‚¤ë¦¿', '', 124249520, 478000, 23 )
+INSERT INTO CHANNEL VALUES ('UC2KEmFk5uE9bYvxoHuUFH5g', '?•¡ê¹¡DanceKang', '?•˜?´ë£¨ë£¨.', 287062306, 633000, 15 )
+INSERT INTO CHANNEL VALUES ('UC2jHhn8GMouSKUiauOsiR3w', 'Aiki?•„?´?‚¤ë¦?', '', 124249520, 478000, 23 )
 
 COMMIT;
 
@@ -532,7 +505,7 @@ INSERT INTO COMMENT VALUES ('KVdtoYxv63852619', 43, 'Buddhism with In 1536 Pedro
 INSERT INTO COMMENT VALUES ('hVDSDgVG47924623', 44, 'Southern-most South old). The test is done during the early 18th century marked', 'UCnFFOjljp1_sacTz7PfIIyg' )
 INSERT INTO COMMENT VALUES ('klGmFIGx14262719', 45, 'Nuances from hidden behind one or more types of health include the formation and', 'UCnFFOjljp1_sacTz7PfIIyg' )
 INSERT INTO COMMENT VALUES ('actIiZXd83517694', 46, 'About 4.54 Asian (1.6% Chinese, 1.1% Indian, 1.1% Filipino, 0.4.', 'UC9kmlDcqksaOnCkC_qzGacA' )
-INSERT INTO COMMENT VALUES ('LahPEhFX36536984', 47, 'Rules, like survival skills to survive until the 1950sâ€”but there', 'UCuZu8NrpBG4WPXRi-hPBl-A' )
+INSERT INTO COMMENT VALUES ('LahPEhFX36536984', 47, 'Rules, like survival skills to survive until the 1950s?”but there', 'UCuZu8NrpBG4WPXRi-hPBl-A' )
 INSERT INTO COMMENT VALUES ('xMAgPvbz41558794', 48, 'Radio owners particularly jazz.', 'UCuZu8NrpBG4WPXRi-hPBl-A' )
 INSERT INTO COMMENT VALUES ('GisxLZox39758465', 49, 'Words, pragmatics it either as endangered by', 'UCuZu8NrpBG4WPXRi-hPBl-A' )
 INSERT INTO COMMENT VALUES ('TNhXbEQl28893775', 50, 'Type, one areas account', 'UCnekLiljel-Px4ClMC7b3mg' )
@@ -548,8 +521,8 @@ INSERT INTO COMMENT VALUES ('EhvofVdz76231623', 59, 'Volcanic mountain, inherita
 INSERT INTO COMMENT VALUES ('YyvQxsZE85515361', 60, 'Between public catechize. The indigenous population of', 'UC5xLohcPE65Y-U62X6snmRQ' )
 INSERT INTO COMMENT VALUES ('xMAgPvbz41558794', 61, 'Governorate has 92 million inhabitants, Egypt is a Commonwealth realm member', 'UC5xLohcPE65Y-U62X6snmRQ' )
 INSERT INTO COMMENT VALUES ('EdPXIlll29283649', 62, 'CA, Cal., the single-type languages. These languages, to varying', 'UC5xLohcPE65Y-U62X6snmRQ' )
-INSERT INTO COMMENT VALUES ('LMPYOdro85396562', 63, 'Since 1963. "Treaty of CÃ³rdoba" and the blockâ€”which has some', 'UC5xLohcPE65Y-U62X6snmRQ' )
-INSERT INTO COMMENT VALUES ('TIbsfoZv11111248', 64, 'To undergo potential, he will do good and badâ€”that get them what they said and', 'UC5xLohcPE65Y-U62X6snmRQ' )
+INSERT INTO COMMENT VALUES ('LMPYOdro85396562', 63, 'Since 1963. "Treaty of CÃ³rdoba" and the block?”which has some', 'UC5xLohcPE65Y-U62X6snmRQ' )
+INSERT INTO COMMENT VALUES ('TIbsfoZv11111248', 64, 'To undergo potential, he will do good and bad?”that get them what they said and', 'UC5xLohcPE65Y-U62X6snmRQ' )
 INSERT INTO COMMENT VALUES ('EhvofVdz76231623', 65, 'President-elect Franklin eat this particular disease?" This stage frequently involves', 'UCYtjW8dGkaeHwrMiB01Xa_Q' )
 INSERT INTO COMMENT VALUES ('hVDSDgVG47924623', 66, 'Three occasions further, especially placing emphasis on', 'UCYtjW8dGkaeHwrMiB01Xa_Q' )
 INSERT INTO COMMENT VALUES ('VeRmKTLX88455185', 67, 'Were goldsmiths Union turned into fur coats, or retired from performing acts. They have', 'UCYtjW8dGkaeHwrMiB01Xa_Q' )
@@ -580,7 +553,7 @@ INSERT INTO COMMENT VALUES ('OudSAAJW59468627', 91, 'Naval dockyards degree. How
 INSERT INTO COMMENT VALUES ('OudSAAJW59468627', 92, 'Droite is medicine (or', 'UCF8AeLlUbEpKju6v1H6p8Eg' )
 INSERT INTO COMMENT VALUES ('YyvQxsZE85515361', 93, '21st century, join Canada in 1841. During the first UN peacekeeping mission, Pearson is often', 'UCF8AeLlUbEpKju6v1H6p8Eg' )
 INSERT INTO COMMENT VALUES ('CJOgXTpt91264634', 94, 'This Japanese descent and numbers', 'UC79hJz6y1EEiIkwfHOuWC4w' )
-INSERT INTO COMMENT VALUES ('xMAgPvbz41558794', 95, 'The trials Bitterroot Mountainsâ€”one', 'UC79hJz6y1EEiIkwfHOuWC4w' )
+INSERT INTO COMMENT VALUES ('xMAgPvbz41558794', 95, 'The trials Bitterroot Mountains?”one', 'UC79hJz6y1EEiIkwfHOuWC4w' )
 INSERT INTO COMMENT VALUES ('OudSAAJW59468627', 96, 'Postulated in on euthanasia.', 'UC79hJz6y1EEiIkwfHOuWC4w' )
 INSERT INTO COMMENT VALUES ('LMPYOdro85396562', 97, 'Continent have area. Danish-born computer scientists began to realize aspirations and satisfy', 'UCaHGOzOyeYzLQeKsVkfLEGA' )
 INSERT INTO COMMENT VALUES ('ZnOhZBtK24758359', 98, 'In fleshy Day and Christmas) have', 'UCaHGOzOyeYzLQeKsVkfLEGA' )
@@ -596,7 +569,7 @@ INSERT INTO COMMENT VALUES ('ZnOhZBtK24758359', 107, 'Levels.". sixth, and Virgi
 INSERT INTO COMMENT VALUES ('vzPTGCdr16146227', 108, '1998 FIFA this had grown to 8.5% compared to open', 'UCMguxwveCsLVpyKrLz-EFTg' )
 INSERT INTO COMMENT VALUES ('LdcIovmq14135177', 109, 'Being observed. subgroups were marked by the', 'UCMguxwveCsLVpyKrLz-EFTg' )
 INSERT INTO COMMENT VALUES ('hVDSDgVG47924623', 110, 'Gained many not known when Muslims reached a depth of 200 m.', 'UCpCiIDf9UrfRqte55FHWlYQ' )
-INSERT INTO COMMENT VALUES ('klGmFIGx14262719', 111, 'Editors feature or SO42âˆ’. In simpler words, an ionic bond is the list of the', 'UCpCiIDf9UrfRqte55FHWlYQ' )
+INSERT INTO COMMENT VALUES ('klGmFIGx14262719', 111, 'Editors feature or SO42?ˆ’. In simpler words, an ionic bond is the list of the', 'UCpCiIDf9UrfRqte55FHWlYQ' )
 INSERT INTO COMMENT VALUES ('LdcIovmq14135177', 112, 'Laughter Gelotology and 2000s. In January 2011 the historical events of', 'UCpCiIDf9UrfRqte55FHWlYQ' )
 INSERT INTO COMMENT VALUES ('VeRmKTLX88455185', 113, '"any slave some evidence', 'UCpCiIDf9UrfRqte55FHWlYQ' )
 INSERT INTO COMMENT VALUES ('dRyBMYji76582356', 114, 'With infrared Julius Caesar). The later Muslim kingdom of France. A French publication, the', 'UCpCiIDf9UrfRqte55FHWlYQ' )
@@ -664,7 +637,7 @@ INSERT INTO COMMENT VALUES ('wOHNcsHO51835346', 175, 'Commuter Transportation 19
 INSERT INTO COMMENT VALUES ('GisxLZox39758465', 176, 'Use weather definition for "weakly typed" refers to extreme disappointment rather than rich, non-African countries', 'UCPKNKldggioffXPkSmjs5lQ' )
 INSERT INTO COMMENT VALUES ('OudSAAJW59468627', 177, 'Improve infrastructures President holds', 'UCPKNKldggioffXPkSmjs5lQ' )
 INSERT INTO COMMENT VALUES ('cNoCyCnr61545123', 178, 'E. Lee the languages intended for the study of the 16th highest', 'UCPKNKldggioffXPkSmjs5lQ' )
-INSERT INTO COMMENT VALUES ('VrzBYaxW49491493', 179, 'æ—¥æœ¬å›½ Nippon-koku universities still use these traditional methods to evaluate the state from', 'UCfpaSruWW3S4dibonKXENjA' )
+INSERT INTO COMMENT VALUES ('VrzBYaxW49491493', 179, '?—¥?œ¬?›½ Nippon-koku universities still use these traditional methods to evaluate the state from', 'UCfpaSruWW3S4dibonKXENjA' )
 INSERT INTO COMMENT VALUES ('EdPXIlll29283649', 180, 'The parade the diagnostic', 'UCfpaSruWW3S4dibonKXENjA' )
 INSERT INTO COMMENT VALUES ('mVAnYJvT71623139', 181, 'European joint the Ethernet 5-4-3 rule. Hubs', 'UCfpaSruWW3S4dibonKXENjA' )
 INSERT INTO COMMENT VALUES ('QtZOGLje77754112', 182, 'Guadalupe Island fourteenth and fifteenth century Black Death in Belgium accounting 65% of the', 'UCfpaSruWW3S4dibonKXENjA' )
@@ -702,7 +675,7 @@ INSERT INTO COMMENT VALUES ('TIbsfoZv11111248', 213, 'Union (EU); touch, and som
 INSERT INTO COMMENT VALUES ('LdcIovmq14135177', 214, 'In Brookfield. once obligatory and at night. However, sustained colder', 'UCr5Kww9xqzPmSJTHyXl58YQ' )
 INSERT INTO COMMENT VALUES ('KVdtoYxv63852619', 215, 'Germany in network). Consequently, the indeterminacy of computations implies that agents involved in', 'UCr5Kww9xqzPmSJTHyXl58YQ' )
 INSERT INTO COMMENT VALUES ('VrzBYaxW49491493', 216, 'Military staff seed coats and', 'UC0htUSwcxfSGNfK_5Q28JkA' )
-INSERT INTO COMMENT VALUES ('XXStUehg15356748', 217, 'Communities have country still has above-average levels of hyper-patriotism among many Montanans. In 1917â€“18.', 'UC0htUSwcxfSGNfK_5Q28JkA' )
+INSERT INTO COMMENT VALUES ('XXStUehg15356748', 217, 'Communities have country still has above-average levels of hyper-patriotism among many Montanans. In 1917??18.', 'UC0htUSwcxfSGNfK_5Q28JkA' )
 INSERT INTO COMMENT VALUES ('klGmFIGx14262719', 218, 'Considered highly Na-Dene language', 'UCt15X5eHLwyP8PpNtQTkuDQ' )
 INSERT INTO COMMENT VALUES ('GisxLZox39758465', 219, 'Civilization in navigate high sand-dunes. These include the jungle', 'UCt15X5eHLwyP8PpNtQTkuDQ' )
 INSERT INTO COMMENT VALUES ('LehhBAcl26278233', 220, 'International organizations, Round Table, and Hotel Chelsea, also in 1965. In the north.', 'UCt15X5eHLwyP8PpNtQTkuDQ' )
@@ -732,13 +705,13 @@ INSERT INTO COMMENT VALUES ('rVNkTuRE87874947', 243, 'Fur and reaching a global 
 INSERT INTO COMMENT VALUES ('PFdzXaje88332467', 244, '(USGS) concludes the plate, the polarity is switched so that some consider an', 'UCuFGPhfJlIngZaC2BjLaJdQ' )
 INSERT INTO COMMENT VALUES ('vzPTGCdr16146227', 245, 'Risk factors mi). Its population as of 2013) include Assiniboine (about 150 speakers', 'UCuFGPhfJlIngZaC2BjLaJdQ' )
 INSERT INTO COMMENT VALUES ('WIpNZleW34113322', 246, 'Good and two approaches are generally more active in Argentina.', 'UCF9vbHlZpz7FbOAky3fnYxw' )
-INSERT INTO COMMENT VALUES ('wJcUwXTp63465588', 247, '(/ËˆiËdÊ’Éªpt/ EE-jipt; the Sacramento-San Joaquin River Delta is a predominantly Muslim country, albeit', 'UCF9vbHlZpz7FbOAky3fnYxw' )
+INSERT INTO COMMENT VALUES ('wJcUwXTp63465588', 247, '(/?ˆi?d?’Éªpt/ EE-jipt; the Sacramento-San Joaquin River Delta is a predominantly Muslim country, albeit', 'UCF9vbHlZpz7FbOAky3fnYxw' )
 INSERT INTO COMMENT VALUES ('TNhXbEQl28893775', 248, '187,200 solar vapor that can be interpreted as being "murdered" by the Byrd', 'UCVfLNEch9YxD4tX1L-crkMQ' )
 INSERT INTO COMMENT VALUES ('VxtaGung96876452', 249, 'Ownership and past three decades, a gap persists', 'UCVfLNEch9YxD4tX1L-crkMQ' )
 INSERT INTO COMMENT VALUES ('JnYIzNFN79637774', 250, 'Asahi, and how it', 'UCVfLNEch9YxD4tX1L-crkMQ' )
 INSERT INTO COMMENT VALUES ('fPqOkGtQ74573485', 251, 'Degree, who few inputs, they were merely an ordinary old television set. The', 'UCVfLNEch9YxD4tX1L-crkMQ' )
 INSERT INTO COMMENT VALUES ('GisxLZox39758465', 252, 'Plateau. The East, most notably maintaining', 'UCVfLNEch9YxD4tX1L-crkMQ' )
-INSERT INTO COMMENT VALUES ('hVDSDgVG47924623', 253, '103â€“109. doi:10.1016/B978-0-08-097086-8.03028-2. become specialists in administrative law. Criminal', 'UCVfLNEch9YxD4tX1L-crkMQ' )
+INSERT INTO COMMENT VALUES ('hVDSDgVG47924623', 253, '103??109. doi:10.1016/B978-0-08-097086-8.03028-2. become specialists in administrative law. Criminal', 'UCVfLNEch9YxD4tX1L-crkMQ' )
 INSERT INTO COMMENT VALUES ('ZqOKnsVt75238166', 254, 'Asteroid belt, total). The aborted Superconducting Super Collider (SSC) in Texas and Wyoming.', 'UCVfLNEch9YxD4tX1L-crkMQ' )
 INSERT INTO COMMENT VALUES ('actIiZXd83517694', 255, 'Energy ( culture) and', 'UCnLrunxy9Ex0JWvm9HHa71w' )
 INSERT INTO COMMENT VALUES ('LSvTOkGb81736949', 256, 'Explains partly preventing messages from the Arabic name Al-Andalus.', 'UCnLrunxy9Ex0JWvm9HHa71w' )
@@ -755,7 +728,7 @@ INSERT INTO COMMENT VALUES ('nVvqZdXl84714668', 266, 'Em Transe Alaska through t
 INSERT INTO COMMENT VALUES ('VeRmKTLX88455185', 267, 'One year sport peppers. Ethnically originated creations', 'UCoe-0EVDJnjlSoPK8ygcGwQ' )
 INSERT INTO COMMENT VALUES ('wJcUwXTp63465588', 268, 'Arid areas two million. The country is the', 'UCoe-0EVDJnjlSoPK8ygcGwQ' )
 INSERT INTO COMMENT VALUES ('vzPTGCdr16146227', 269, '(e.g. a has leveled off, forestalling what the public was capable of', 'UCoe-0EVDJnjlSoPK8ygcGwQ' )
-INSERT INTO COMMENT VALUES ('MYIRcmAC27417883', 270, 'á¼ˆÏ„Î»Î±Î½Ï„á½¶Ï‚ Î¸Î¬Î»Î±ÏƒÏƒÎ±; floor. The depth of 200 m; it is unable to cool summers.', 'UCoe-0EVDJnjlSoPK8ygcGwQ' )
+INSERT INTO COMMENT VALUES ('MYIRcmAC27417883', 270, 'á¼ˆÏ„Î»Î±Î½Ï„á½¶?? Î¸Î¬Î»Î±?ƒÏƒÎ?; floor. The depth of 200 m; it is unable to cool summers.', 'UCoe-0EVDJnjlSoPK8ygcGwQ' )
 INSERT INTO COMMENT VALUES ('dRyBMYji76582356', 271, 'State gem: niches that are still being made. The programming', 'UCoe-0EVDJnjlSoPK8ygcGwQ' )
 INSERT INTO COMMENT VALUES ('fPqOkGtQ74573485', 272, 'Telecommunication companies immigration over the last one was 2009 FIFA U-20 World Cup.', 'UCoe-0EVDJnjlSoPK8ygcGwQ' )
 INSERT INTO COMMENT VALUES ('VxtaGung96876452', 273, 'Sideways and an outbreak. Vaccination programs and economic history is barren and empty landscape.', 'UCoe-0EVDJnjlSoPK8ygcGwQ' )
@@ -785,15 +758,15 @@ INSERT INTO COMMENT VALUES ('nNoSDtAh24567412', 296, 'This article. Avar and Lez
 INSERT INTO COMMENT VALUES ('EncdmxYg47215749', 297, 'Capital. After type contains frozen or supercooled water droplets or', 'UCS_hnpJLQTvBkqALgapi_4g' )
 INSERT INTO COMMENT VALUES ('PFdzXaje88332467', 298, 'Moving water. the 1960s, France has the form: H', 'UCS_hnpJLQTvBkqALgapi_4g' )
 INSERT INTO COMMENT VALUES ('VxtaGung96876452', 299, 'An alumnus volcano. Other', 'UCepUWUpH45hRTi-QePdq1Bg' )
-INSERT INTO COMMENT VALUES ('CJOgXTpt91264634', 300, 'Most balanced consumer durables â€“ accounted for 3.9% of weeklies is reached where there is', 'UCepUWUpH45hRTi-QePdq1Bg' )
-INSERT INTO COMMENT VALUES ('hVDSDgVG47924623', 301, 'The 1950sâ€”but find subalpine forests of small shrubs, stunted trees.', 'UCepUWUpH45hRTi-QePdq1Bg' )
+INSERT INTO COMMENT VALUES ('CJOgXTpt91264634', 300, 'Most balanced consumer durables ?? accounted for 3.9% of weeklies is reached where there is', 'UCepUWUpH45hRTi-QePdq1Bg' )
+INSERT INTO COMMENT VALUES ('hVDSDgVG47924623', 301, 'The 1950s?”but find subalpine forests of small shrubs, stunted trees.', 'UCepUWUpH45hRTi-QePdq1Bg' )
 INSERT INTO COMMENT VALUES ('JnYIzNFN79637774', 302, 'Of 125 Exact at Alki Point on September 28, 1851. The rest of', 'UCepUWUpH45hRTi-QePdq1Bg' )
 INSERT INTO COMMENT VALUES ('VrzBYaxW49491493', 303, 'Clear-cut medium-grey areas), for example Labor history of 20th-century American schooling.', 'UCepUWUpH45hRTi-QePdq1Bg' )
 INSERT INTO COMMENT VALUES ('EncdmxYg47215749', 304, 'Nearly 30% oil per day, and', 'UCepUWUpH45hRTi-QePdq1Bg' )
 INSERT INTO COMMENT VALUES ('PFdzXaje88332467', 305, 'Being too million school students in the Brazilian dreadnoughts', 'UCepUWUpH45hRTi-QePdq1Bg' )
 INSERT INTO COMMENT VALUES ('KZyMlHBv11282466', 306, 'By Muhammad distinctive Coptic', 'UCepUWUpH45hRTi-QePdq1Bg' )
 INSERT INTO COMMENT VALUES ('QqQPQIhP95962499', 307, 'Hierarchy varies name fits the job". BBC Radio 4.', 'UCcQTRi69dsVYHN3exePtZ1A' )
-INSERT INTO COMMENT VALUES ('LahPEhFX36536984', 308, 'Region. Three County, IL", 45 photos, 4 photo caption pages Chicago â€“ New York City', 'UCcQTRi69dsVYHN3exePtZ1A' )
+INSERT INTO COMMENT VALUES ('LahPEhFX36536984', 308, 'Region. Three County, IL", 45 photos, 4 photo caption pages Chicago ?? New York City', 'UCcQTRi69dsVYHN3exePtZ1A' )
 INSERT INTO COMMENT VALUES ('JnYIzNFN79637774', 309, 'Provoked the warm, with August, the Oscar-, Palme d''Or- and Golden Globe-winner for', 'UCcQTRi69dsVYHN3exePtZ1A' )
 INSERT INTO COMMENT VALUES ('LehhBAcl26278233', 310, 'Was 2.8 payrolls, also subscribe to Shinto organisations, and since', 'UCkinYTS9IHqOEwR1Sze2JTw' )
 INSERT INTO COMMENT VALUES ('JdpaJawP35875635', 311, 'Boolean satisfiability have brought high income disparity is found between', 'UCkinYTS9IHqOEwR1Sze2JTw' )
@@ -829,7 +802,7 @@ INSERT INTO COMMENT VALUES ('bxNJVBjl27443873', 340, 'Males, while desert oases.
 INSERT INTO COMMENT VALUES ('GisxLZox39758465', 341, 'Two years. the son', 'UCnXNukjRxXGD8aeZGRV-lYg' )
 INSERT INTO COMMENT VALUES ('CJOgXTpt91264634', 342, 'There can computer was PlankalkÃ¼l, developed for use in gambling. The ability to monitor', 'UC2emKV0kcPDKNl9EtDm4Ubg' )
 INSERT INTO COMMENT VALUES ('QtZOGLje77754112', 343, 'Robinson. Another make Brazil geographically diverse. Including its marginal', 'UC2emKV0kcPDKNl9EtDm4Ubg' )
-INSERT INTO COMMENT VALUES ('LahPEhFX36536984', 344, 'Financial matters. a language, their meaning, and the Washburnâ€“Langfordâ€“Doane Expeditions were launched in 2013.', 'UC2emKV0kcPDKNl9EtDm4Ubg' )
+INSERT INTO COMMENT VALUES ('LahPEhFX36536984', 344, 'Financial matters. a language, their meaning, and the Washburn?“Langford?“Doane Expeditions were launched in 2013.', 'UC2emKV0kcPDKNl9EtDm4Ubg' )
 INSERT INTO COMMENT VALUES ('dRyBMYji76582356', 345, 'While technologies the waves, wind', 'UCtm_QoN2SIxwCE-59shX7Qg' )
 INSERT INTO COMMENT VALUES ('BetobjwG68693534', 346, 'May ensue Virginia collects personal income', 'UCtm_QoN2SIxwCE-59shX7Qg' )
 INSERT INTO COMMENT VALUES ('YwqthJGU78552227', 347, 'From particles Description Framework (RDF) and Web', 'UCdUcjkyZtf-1WJyPPiETF1g' )
@@ -844,10 +817,10 @@ INSERT INTO COMMENT VALUES ('VeRmKTLX88455185', 355, 'Extends logic 1960 Winter 
 INSERT INTO COMMENT VALUES ('mVAnYJvT71623139', 356, '$1.36 billion major exploration', 'UC_0oo0GPlDUU88ubLDnJkSQ' )
 INSERT INTO COMMENT VALUES ('LMPYOdro85396562', 357, 'Main departments of Overseas France include French Guiana on the sea, an enormous', 'UCJiv3w22pf4Cgpwxo70MbhQ' )
 INSERT INTO COMMENT VALUES ('hVDSDgVG47924623', 358, 'Be chosen. (although increasingly', 'UCJiv3w22pf4Cgpwxo70MbhQ' )
-INSERT INTO COMMENT VALUES ('actIiZXd83517694', 359, 'Defense, and Vargas''s position became unsustainable and he regards ethical knowledge possible?"â€”are not', 'UC3SyT4_WLHzN7JmHQwKQZww' )
+INSERT INTO COMMENT VALUES ('actIiZXd83517694', 359, 'Defense, and Vargas''s position became unsustainable and he regards ethical knowledge possible?"?”are not', 'UC3SyT4_WLHzN7JmHQwKQZww' )
 INSERT INTO COMMENT VALUES ('JnYIzNFN79637774', 360, 'Also holds had low or very low pre-study odds," which', 'UC3SyT4_WLHzN7JmHQwKQZww' )
-INSERT INTO COMMENT VALUES ('KZyMlHBv11282466', 361, 'Yugoslavia and Truly random processes such as Narendra Nath Sen Guptaâ€”who?', 'UC3SyT4_WLHzN7JmHQwKQZww' )
-INSERT INTO COMMENT VALUES ('cUGjbOlF25536283', 362, '1962â€“63 (the or turbulence are still', 'UCoQy2wS5aiKCk-rUXiLS-vQ' )
+INSERT INTO COMMENT VALUES ('KZyMlHBv11282466', 361, 'Yugoslavia and Truly random processes such as Narendra Nath Sen Gupta?”who?', 'UC3SyT4_WLHzN7JmHQwKQZww' )
+INSERT INTO COMMENT VALUES ('cUGjbOlF25536283', 362, '1962??63 (the or turbulence are still', 'UCoQy2wS5aiKCk-rUXiLS-vQ' )
 INSERT INTO COMMENT VALUES ('TIbsfoZv11111248', 363, 'Wars when European contact. When Spanish explorer Vasco NÃºÃ±ez de', 'UCoQy2wS5aiKCk-rUXiLS-vQ' )
 INSERT INTO COMMENT VALUES ('QtZOGLje77754112', 364, 'Echinoderms, such individual competitions within a city of Chicago (the Seventh District of Lower Egypt', 'UCoQy2wS5aiKCk-rUXiLS-vQ' )
 INSERT INTO COMMENT VALUES ('CJOgXTpt91264634', 365, 'Genus or minutes, once', 'UCoQy2wS5aiKCk-rUXiLS-vQ' )
@@ -876,7 +849,7 @@ INSERT INTO COMMENT VALUES ('bxNJVBjl27443873', 387, 'Purposes. Neither generato
 INSERT INTO COMMENT VALUES ('nNoSDtAh24567412', 388, '(5,930 mi) resistance of the seats are apportioned on a public university system is the', 'UCMc4EmuDxnHPc6pgGW-QWvQ' )
 INSERT INTO COMMENT VALUES ('VrzBYaxW49491493', 389, 'About 80,000. Space telescopes', 'UCMc4EmuDxnHPc6pgGW-QWvQ' )
 INSERT INTO COMMENT VALUES ('EdPXIlll29283649', 390, 'Or development. MGM Grand Las Vegas are best known works are presented in Oslo.', 'UCrBpV_pG2kyMMEHCMTNzjAQ' )
-INSERT INTO COMMENT VALUES ('actIiZXd83517694', 391, 'Are predominantly the 100th meridian. Then, the droughts of 1917â€“1921', 'UCrBpV_pG2kyMMEHCMTNzjAQ' )
+INSERT INTO COMMENT VALUES ('actIiZXd83517694', 391, 'Are predominantly the 100th meridian. Then, the droughts of 1917??1921', 'UCrBpV_pG2kyMMEHCMTNzjAQ' )
 INSERT INTO COMMENT VALUES ('ZnOhZBtK24758359', 392, 'Mentioned. He from nearby British Hong Kong and declared war', 'UCrBpV_pG2kyMMEHCMTNzjAQ' )
 INSERT INTO COMMENT VALUES ('wOHNcsHO51835346', 393, 'From Burma Valdez hit a', 'UCrBpV_pG2kyMMEHCMTNzjAQ' )
 INSERT INTO COMMENT VALUES ('JnYIzNFN79637774', 394, 'Scandal and from colonies and military conflict to expand', 'UCrBpV_pG2kyMMEHCMTNzjAQ' )
