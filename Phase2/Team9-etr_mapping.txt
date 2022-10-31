@@ -1,0 +1,76 @@
+ER Schema 수정사항:
+
+	- 'USER'는 예약어로 테이블 이름으로 사용할 수 없으므로, 엔티티 이름 'USER'를 'CUSTOMER'로 수정
+		- 속성 'user_id'를 'customer_id'로 수정
+		- 속성 'user_password'를 'password'로 수정
+
+	- 'COMMENT'는 테이블 이름으로 사용할 수 없으므로, 엔티티 이름 'COMMENT'를 'COMMENTS'로 수정
+		- 속성 'comment'를 'message'로 수정
+
+	- 엔티티 'COMMENTS'는 속성 'comment_id'로 식별 가능하므로, Weak Entity에서 Regular Entity로 수정
+		- 엔티티 'COMMENTS'가 참여하는 Identifying Relationship 'WRITE', 'PROVIDES'를 Regular Relationship로 수정
+
+	- 엔티티 'COMMENTS'의 Derived Attribute 'heart_num'의 값을 결정하기 위해, CUSTOMER COMMENTS Relation 'RECOMMEND'를 추가
+
+	- 엔티티 'RATING'는 평가를 내린 엔티티 'CUSTOMER', 평가를 받은 엔티티 'CHANNEL'에 의해 식별 가능하므로, Weak Entity임
+		- 유일하게 식별 가능한 속성 'rating_id'를 삭제, 특정 'CUSTOMER'가 특정 'CHANNEL'에 내린 평가 사이에서 식별 가능한 속성 'rating'을 partial key로 수정
+
+	- 엔티티 'CHANNEL'의 속성 'channel_url'은 'channel_id'를 통해 얻을 수 있으므로 삭제
+
+
+ER-to-Relational Mapping:
+
+	- Relation 'CUSTOMER'
+		- 'CUSTOMER'는 Regular Entity이므로, Relation 'CUSTOMER'를 만듦
+		- 모든 attribute가 simple attribute이므로, relation에 추가
+		- 속성 'customer_id'를 primary key로 설정
+
+	- Relation 'YOUTUBER'
+		- 'YOUTUBER'는 Regular Entity이므로, Relation 'YOUTUBER'를 만듦
+		- derived attribute 'channel_num'을 제외한 모든 attribute가 simple attribute이므로, relation에 추가
+		- 속성 'youtuber_id'를 primary key로 설정
+
+	- Relation 'PERFORMER'
+		- 'PERFORMER'는 Regular Entity이므로, Relation 'PERFORMER'를 만듦
+		- 모든 attribute가 simple attribute이므로, relation에 추가
+		- 속성 'performer_id'를 primary key로 설정
+
+	- Relation 'GENRE'
+		- 'GENRE'는 Regular Entity이므로, Relation 'GENRE'를 만듦
+		- 모든 attribute가 simple attribute이므로, relation에 추가
+		- 속성 'genre_num'를 primary key로 설정
+
+	- Relation 'CHANNEL'
+		- 'CHANNEL'는 Regular Entity이므로, Relation 'CHANNEL'를 만듦
+		- 모든 attribute가 simple attribute이므로, relation에 추가
+		- 속성 'channel_id'를 primary key로 설정
+		- 'OPERATE'는 regular binary 1:N relationship이므로, N-side entity 'CHANNEL'을 매핑한 relation 'CHANNEL'에 1-side entity 'YOUTUBER'의 primary key 'youtuber_id'를 foreign key로 추가
+
+	- Relation 'HAS'
+		- 'HAS'는 regular binary M:N relationship이므로, Relation 'HAS'를 만듦
+		- relationship에 참여하는 entity 'CHANNEL', 'GENRE'의 primary key 'channel_id', 'genre_num'을 relation 'HAS'의 foreign key로 추가
+		- foreign key의 조합인 {channel_id, genre_num}을 primary key로 설정
+
+	- Relation 'PARTICIPATION'
+		- 'PARTICIPATES'는 regular binary M:N relationship이므로, Relation 'PARTICIPATION'를 만듦
+		- relationship에 참여하는 entity 'CHANNEL', 'PERFORMER'의 primary key 'channel_id', 'performer_id'을 relation 'PARTICIPATION'의 foreign key로 추가
+		- foreign key의 조합인 {channel_id, performer_id}을 primary key로 설정
+
+	- Relation 'COMMENTS'
+		- 'COMMENTS'는 Regular Entity이므로, Relation 'COMMENTS'를 만듦
+		- derived attribute 'heart_num'을 제외한 모든 attribute가 simple attribute이므로, relation에 추가
+		- 속성 'comment_id'를 primary key로 설정
+		- 'WRITE'는 regular binary 1:N relationship이므로, N-side entity 'COMMENTS'을 매핑한 relation 'COMMENTS'에 1-side entity 'CUSTOMER'의 primary key 'customer_id'를 foreign key로 추가
+		- 'PROVIDES'는 regular binary 1:N relationship이므로, N-side entity 'COMMENTS'을 매핑한 relation 'COMMENTS'에 1-side entity 'CHANNEL'의 primary key 'channel_id'를 foreign key로 추가
+
+	- Relation 'RECOMMENDATION'
+		- 'RECOMMEND'는 regular binary M:N relationship이므로, Relation 'RECOMMENDATION'를 만듦
+		- relationship에 참여하는 entity 'CUSTOMER', 'COMMENTS'의 primary key 'customer_id', 'comment_id'을 relation 'RECOMMENDATION'의 foreign key로 추가
+		- foreign key의 조합인 {customer_id, comment_id}을 primary key로 설정
+
+	- Relation 'RATING'
+		- 'RATING'는 Weak Entity이므로, Relation 'RATING'를 만듦
+		- derived attribute 'average_rating'을 제외한 모든 attribute가 simple attribute이므로, relation에 추가
+		- owner entity 'CUSTOMER'의 primary key 'customer_id'을 relation 'RATING'의 foreign key로 추가
+		- owner entity 'CHANNEL'의 primary key 'channel_id'을 relation 'RATING'의 foreign key로 추가
+		- foreign key, partial key의 조합인 {customer_id, channel_id, rating}을 primary key로 설정
