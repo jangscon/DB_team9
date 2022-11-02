@@ -1,12 +1,17 @@
 --1)
---±¸µ¶ÀÚ ¼ö°¡ 100¸¸¸í ÀÌ»óÀÎ Ã¤³ÎÀÇ Ã¤³Î ÀÌ¸§°ú Ã¤³Î ¼³¸íÀ» ¹ÝÈ¯
+--êµ¬ë…ìž ìˆ˜ê°€ 100ë§Œëª… ì´ìƒì¸ ì±„ë„ì˜ ì±„ë„ ì´ë¦„ê³¼ ì±„ë„ ì„¤ëª…ì„ ë°˜í™˜
 SELECT  c.channel_name, c.description
 FROM    channel c
 WHERE   c.subscriber_num >= 1000000
 ORDER BY    c.channel_name;
 
+-- gmailì„ ì‚¬ìš©í•˜ëŠ” ìœ ì €ì˜ ì´ë¦„, ë‹‰ë„¤ìž„ , ì´ë©”ì¼ì„ ì¶œë ¥
+SELECT u.name , u.nickname , u.email
+FROM CUSTOMER u
+WHERE u.email LIKE '%@gmail.com';
+
 --2)
---ÆòÁ¡ 1Á¡À» ÁØ »ç¿ëÀÚÀÇ ´Ð³×ÀÓ°ú ±× Ã¤³Î ÀÌ¸§À» ¹ÝÈ¯
+--í‰ì  1ì ì„ ì¤€ ì‚¬ìš©ìžì˜ ë‹‰ë„¤ìž„ê³¼ ê·¸ ì±„ë„ ì´ë¦„ì„ ë°˜í™˜
 SELECT  u.nickname, c.channel_name
 FROM    customer u, rating r, channel c
 WHERE   u.customer_id = r.customer_id
@@ -14,8 +19,17 @@ AND     r.channel_id = c.channel_id
 AND     r.rating = 1
 ORDER BY    c.channel_name;
 
+-- 	ìœ íŠœë¸Œ ì±„ë„ì¤‘ ì½”ë¯¸ë”” ìž¥ë¥´ë¥¼ ê°€ì§€ê³  ìžˆëŠ” ì±„ë„ì—ì„œ í™œë™í•˜ëŠ” performerì˜ ì´ë¦„ê³¼ ìºë¦­í„° , í™œë™ ì±„ë„ ì´ë¦„ì„ ì¶œë ¥
+SELECT DISTINCT c.channel_name , p.name , p.character
+FROM CHANNEL c, PERFORMER p , HAS h , GENRE g , PARTICIPATION pa
+WHERE c.channel_id = h.channel_id
+AND h.genre_num = g.genre_num
+AND g.genre_name = 'Comedy'
+AND pa.channel_id = c.channel_id
+AND pa.performer_id = p.performer_id;
+
 --3)
---´ñ±ÛÀÌ ÀÛ¼ºµÈ Ã¤³Î ÀÌ¸§, ´ñ±ÛÀÇ ³»¿ë, ÃßÃµ ¼ö¸¦ ¹ÝÈ¯
+--ëŒ“ê¸€ì´ ìž‘ì„±ëœ ì±„ë„ ì´ë¦„, ëŒ“ê¸€ì˜ ë‚´ìš©, ì¶”ì²œ ìˆ˜ë¥¼ ë°˜í™˜
 SELECT      c.channel_name, m.message, count(*) AS heart_num
 FROM        recommendation r, comments m, channel c
 WHERE       r.comment_id = m.comment_id
@@ -23,8 +37,16 @@ AND         m.channel_id = c.channel_id
 GROUP BY    c.channel_name, m.message
 ORDER BY    c.channel_name, m.message;
 
+-- 	10ê°œ ì´ìƒì˜ ì±„ë„ì—ì„œ ì‚¬ìš©ëœ ìž¥ë¥´ì˜ ì´ë¦„ê³¼ í•´ë‹¹ ìž¥ë¥´ë¥¼ ê°€ì§€ëŠ” ì±„ë„ ìˆ˜ ì¶œë ¥
+SELECT g.genre_name , COUNT(*)
+FROM HAS h , GENRE g
+WHERE h.genre_num = g.genre_num
+GROUP BY g.genre_name
+HAVING COUNT(*) >= 10;
+
+
 --4)
---¾î¶² Àå¸£¿¡ ´ëÇØ Æò±Õº¸´Ù ³ôÀº ÆòÁ¡À» ÁØ »ç¶÷À» Àå¸£ ÀÌ¸§, ´Ð³×ÀÓ, ÆòÁ¡ ¼øÀ¸·Î ¹ÝÈ¯
+--ì–´ë–¤ ìž¥ë¥´ì— ëŒ€í•´ í‰ê· ë³´ë‹¤ ë†’ì€ í‰ì ì„ ì¤€ ì‚¬ëžŒì„ ìž¥ë¥´ ì´ë¦„, ë‹‰ë„¤ìž„, í‰ì  ìˆœìœ¼ë¡œ ë°˜í™˜
 SELECT  g.genre_name, u.nickname, r.rating
 FROM    customer u, rating r, channel c, genre g, has h
 WHERE   u.customer_id = r.customer_id
@@ -40,8 +62,16 @@ AND     r.rating > (
 )
 ORDER BY    g.genre_name, r.rating DESC;
 
+-- 	ëª¨ë“  ì±„ë„ì˜ í‰ê·  êµ¬ë…ìž ìˆ˜ë³´ë‹¤ êµ¬ë…ìžìˆ˜ê°€ í¬ê±°ë‚˜ ê°™ì€ ì±„ë„ì˜ ì´ë¦„, êµ¬ë…ìž ìˆ˜ë¥¼ ì¶œë ¥
+SELECT c.channel_name ,  c.subscriber_num
+FROM CHANNEL c
+WHERE c.subscriber_num >=
+		(select AVG(subscriber_num)
+		  from channel);
+
+
 --5)
---Ã¤³ÎÀÇ Àå¸£·Î 'Makeup' ´Ü ÇÏ³ª¸¸À» °¡Áö´Â Ã¤³ÎÀÇ ID, ÀÌ¸§, ±¸µ¶ÀÚ ¼ö¸¦ ¹ÝÈ¯
+--ì±„ë„ì˜ ìž¥ë¥´ë¡œ 'Makeup' ë‹¨ í•˜ë‚˜ë§Œì„ ê°€ì§€ëŠ” ì±„ë„ì˜ ID, ì´ë¦„, êµ¬ë…ìž ìˆ˜ë¥¼ ë°˜í™˜
 SELECT  c.channel_id, c.channel_name, c.subscriber_num
 FROM    channel c
 WHERE   NOT EXISTS (
@@ -61,8 +91,20 @@ WHERE   NOT EXISTS (
     )
 );
 
+
+-- êµ¬ë…ìžê°€ 100ë§Œëª… ì´ìƒì¸ ì±„ë„ì— ëŒ“ê¸€ì€ ë‹¨ ì‚¬ëžŒì˜ ë‹‰ë„¤ìž„ê³¼ ì±„ë„ì´ë¦„ , ëŒ“ê¸€ë‚´ìš©ì„ ì¤‘ë³µì—†ì´ ì¶£ë ¥
+SELECT DISTINCT u.nickname , ch.channel_name , c.message
+FROM COMMENTS c , CUSTOMER u , channel ch
+WHERE c.customer_id = u.customer_id
+    AND c.channel_id = ch.channel_id
+    AND EXISTS (
+            SELECT channel_id
+			FROM channel
+			WHERE subscriber_num >= 1000000
+);
+
 --6)
---Àå¸£ Áß 'Critics'°¡ Æ÷ÇÔµÈ Ã¤³Î¿¡ ÀÛ¼ºµÈ ´ñ±ÛÀ» ¹ÝÈ¯
+--ìž¥ë¥´ ì¤‘ 'Critics'ê°€ í¬í•¨ëœ ì±„ë„ì— ìž‘ì„±ëœ ëŒ“ê¸€ì„ ë°˜í™˜
 SELECT  c.channel_name, m.message
 FROM    comments m, channel c
 WHERE   m.channel_id = c.channel_id
@@ -75,8 +117,20 @@ AND     c.channel_id IN (
 )
 ORDER BY    c.channel_name, m.message;
 
+--	í† íƒˆë·°ê°€ 1ì–µë·° ì´ìƒì¸ ì±„ë„ì˜ ìž¥ë¥´ ì´ë¦„ì„ ì¤‘ë³µì—†ì´ ì¶œë ¥
+SELECT distinct genre_name
+FROM GENRE
+WHERE genre_num IN
+	(
+		SELECT h.genre_num
+		FROM HAS h , CHANNEL c
+		WHERE h.channel_id = c.channel_id
+			AND c.total_views >= 100000000
+
+	);
+
 --7)
---Ã¤³ÎÀÇ Æò°¡ÀÚ ¼ö°¡ °¡Àå ¸¹Àº Ã¤³Î(µé)ÀÇ Ã¤³Î ÀÌ¸§, ¼³¸í, Æò°¡ÀÚ ¼ö¸¦ ¹ÝÈ¯
+--ì±„ë„ì˜ í‰ê°€ìž ìˆ˜ê°€ ê°€ìž¥ ë§Žì€ ì±„ë„(ë“¤)ì˜ ì±„ë„ ì´ë¦„, ì„¤ëª…, í‰ê°€ìž ìˆ˜ë¥¼ ë°˜í™˜
 WITH    number_of_evaluators AS
     (   SELECT  c.channel_id, count(*) AS number_of_evaluators
         FROM    channel c, rating r
@@ -90,10 +144,21 @@ AND     n1.number_of_evaluators = (
     FROM    number_of_evaluators n2)
 ORDER BY    channel_name;
 
+
+-- Actor ì—­ì„ ë§¡ê³  ìžˆê³  ì´ë¦„ì´ Bë¡œ ì‹œìž‘í•˜ëŠ” performerì˜ idì™€ ì´ë¦„ì„ ì¶œë ¥
+SELECT  performer_id, name
+FROM (
+	SELECT *
+	FROM PERFORMER p
+	WHERE p.character = 'Actor'
+)
+WHERE name LIKE 'B%';
+
+
 --8)
---Àå¸£ ÀÌ¸§¿¡ 'A, a'°¡ Æ÷ÇÔµÈ Ã¤³ÎÀÇ µîÀåÀÎ¹° Áß ÀÌ¸§¿¡ 'A, a'°¡ Æ÷ÇÔµÈ »ç¶÷À» ¹ÝÈ¯
---Àå¸£ ÀÌ¸§¿¡ ¸ðµÎ 'A, a'°¡ Æ÷ÇÔµÇ´Â °æ¿ì,
---Áßº¹ Á¦°Å¸¦ À§ÇØ SELECT¿¡ Àå¸£ ÀÌ¸§À» Æ÷ÇÔÇÏÁö ¾Ê°í, DISTINCT »ç¿ë
+--ìž¥ë¥´ ì´ë¦„ì— 'A, a'ê°€ í¬í•¨ëœ ì±„ë„ì˜ ë“±ìž¥ì¸ë¬¼ ì¤‘ ì´ë¦„ì— 'A, a'ê°€ í¬í•¨ëœ ì‚¬ëžŒì„ ë°˜í™˜
+--ìž¥ë¥´ ì´ë¦„ì— ëª¨ë‘ 'A, a'ê°€ í¬í•¨ë˜ëŠ” ê²½ìš°,
+--ì¤‘ë³µ ì œê±°ë¥¼ ìœ„í•´ SELECTì— ìž¥ë¥´ ì´ë¦„ì„ í¬í•¨í•˜ì§€ ì•Šê³ , DISTINCT ì‚¬ìš©
 SELECT  DISTINCT c.channel_name, f.name
 FROM    channel c, performer f, participation p, genre g, has h
 WHERE   c.channel_id = p.channel_id
@@ -104,9 +169,18 @@ AND     (f.name LIKE '%A%' OR f.name LIKE '%a%')
 AND     (g.genre_name LIKE '%A%' OR g.genre_name LIKE '%a%')
 ORDER BY    c.channel_name, f.name;
 
+
+--ìœ íŠœë²„ì™€ ê·¸ì˜ ì²´ë„ ì´ë¦„ , êµ¬ë…ìžìˆ˜ë¥¼ ì¶œë ¥í•˜ê³  êµ¬ë…ìžìˆ˜ë¥¼ ë‚´ë¦¼ì°¨ìˆœìœ¼ë¡œ ì •ë ¬í•œ í›„ ì¶œë ¥í•œë‹¤.
+SELECT channel_name , name  , subscriber_num
+FROM CHANNEL c , YOUTUBER y
+WHERE c.youtuber_id = y.youtuber_id
+ORDER BY subscriber_num DESC;
+
+
+
 --9)
---Ã¤³ÎÀÇ °ü¸®ÀÚ ÀÌ¸§, Ã¤³Î ÀÌ¸§, ÃÑ Á¶È¸¼ö, ±¸µ¶ÀÚ ¼ö, Æò±Õ ÆòÁ¡À» ¹ÝÈ¯
---Æò±Õ ÆòÁ¡ ¼øÀ¸·Î ³»¸²Â÷¼ø Á¤·ÄÇÏµÇ, ÆòÁ¡ÀÌ Áßº¹µÉ °æ¿ì Ã¤³Î ÀÌ¸§À¸·Î »çÀü¼ø Á¤·ÄÇÔ
+--ì±„ë„ì˜ ê´€ë¦¬ìž ì´ë¦„, ì±„ë„ ì´ë¦„, ì´ ì¡°íšŒìˆ˜, êµ¬ë…ìž ìˆ˜, í‰ê·  í‰ì ì„ ë°˜í™˜
+--í‰ê·  í‰ì  ìˆœìœ¼ë¡œ ë‚´ë¦¼ì°¨ìˆœ ì •ë ¬í•˜ë˜, í‰ì ì´ ì¤‘ë³µë  ê²½ìš° ì±„ë„ ì´ë¦„ìœ¼ë¡œ ì‚¬ì „ìˆœ ì •ë ¬í•¨
 SELECT  y.name AS manager_name, c.channel_name, c.total_views, c.subscriber_num,
     round(avg(r.rating), 1) AS average_rating
 FROM    rating r, channel c, youtuber y
@@ -115,8 +189,19 @@ AND     c.youtuber_id = y.youtuber_id
 GROUP BY    y.name, c.channel_name, c.total_views, c.subscriber_num
 ORDER BY    round(avg(r.rating), 1) DESC, c.channel_name;
 
+-- ìž¥ë¥´ì´ë¦„ê³¼ ìž¥ë¥´ë§ˆë‹¤ ìœ íŠœë¸Œì— ì°¸ì—¬í•˜ê³  ìžˆëŠ” ì°¸ì—¬ìžì˜ ìˆ«ìžì˜ í•©ì„ ì¶œë ¥í•˜ëŠ”ë° ìˆ«ìžì˜ í•©ì„ ë‚´ë¦¼ì°¨ìˆœìœ¼ë¡œ ì •ë ¬í•´ ì¶œë ¥
+SELECT genre_name , COUNT(*)
+FROM participation p , performer pf , channel c , has h , genre g
+WHERE p.performer_id = pf.performer_id
+	AND p.channel_id = c.channel_id
+	AND h.channel_id = c.channel_id
+ 	AND h.genre_num = g,genre_num
+GROUP BY genre_name
+ORDER BY COUNT(*) DESC;
+
+
 --10)
---'ÃÑ¸î¸í', 'Àå»ßÂÞ' Ã¤³ÎÀÌ °øÅëÀûÀ¸·Î °¡Áö°í ÀÖ´Â Àå¸£ÀÇ ÀÌ¸§À» ¹ÝÈ¯
+--'ì´ëª‡ëª…', 'ìž¥ì‚ì­ˆ' ì±„ë„ì´ ê³µí†µì ìœ¼ë¡œ ê°€ì§€ê³  ìžˆëŠ” ìž¥ë¥´ì˜ ì´ë¦„ì„ ë°˜í™˜
 SELECT  g.genre_name
 FROM    genre g
 WHERE   g.genre_num in (
@@ -125,7 +210,7 @@ WHERE   g.genre_num in (
         FROM    channel c1, genre g1, has h1
         WHERE   c1.channel_id = h1.channel_id
         AND     g1.genre_num = h1.genre_num
-        AND     c1.channel_name = 'ÃÑ¸î¸í'
+        AND     c1.channel_name = 'ï¿½Ñ¸ï¿½ï¿½'
     )
     INTERSECT
     (
@@ -133,6 +218,23 @@ WHERE   g.genre_num in (
         FROM    channel c2, genre g2, has h2
         WHERE   c2.channel_id = h2.channel_id
         AND     g2.genre_num = h2.genre_num
-        AND     c2.channel_name = 'Àå»ßÂÞ'
+        AND     c2.channel_name = 'ï¿½ï¿½ï¿½ï¿½ï¿½'
     )
+);
+
+-- ìž¥ë¥´ ì´ë¦„ì˜ ê¸¸ì´ê°€ 6ìž ì´ìƒ , 7ìž ë¯¸ë§Œì¸ (ì˜¤ì§ 6ìž) ìž¥ë¥´ì´ë¦„ ì¶œë ¥
+SELECT g.genre_name
+FROM genre g
+WHERE g.genre_num in (
+	(
+		SELECT *
+		FROM genre g1
+		WHERE LENGTH(g1.genre_name) >= 6
+	)
+	MINUS
+	(
+		SELECT *
+		FROM genre g2
+		WHERE LENGTH(g2.genre_name) < 7
+	)
 );
