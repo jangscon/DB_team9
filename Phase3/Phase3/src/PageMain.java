@@ -5,7 +5,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Scanner;
-import java.util.StringJoiner;
 
 public class PageMain {
 	private Connection conn;
@@ -13,16 +12,21 @@ public class PageMain {
 	private Scanner sc;
 	private int orderBy;
 	private PageSearch pageSearch;
+	private PageChannelInfo pageChannelInfo;
 
 	public PageMain(Connection conn, Statement stmt, Scanner sc) {
 		this.conn = conn;
 		this.stmt = stmt;
 		this.sc = sc;
-		this.orderBy = Phase3.ORDER_BY_CHANNEL_NAME;
+		this.orderBy = SQL.ORDER_BY_CHANNEL_NAME;
 	}
 
 	public void setPageSearch(PageSearch pageSearch) {
 		this.pageSearch = pageSearch;
+	}
+
+	public void setPageChannelInfo(PageChannelInfo pageChannelInfo) {
+		this.pageChannelInfo = pageChannelInfo;
 	}
 
 	public void print() {
@@ -33,14 +37,14 @@ public class PageMain {
 		System.out.println(
 				"------------------------ -------------- ----------- ---------------------------------------- -------------------------");
 
-		try (ResultSet rsMain = this.stmt.executeQuery(this.sqlMain())) {
+		try (ResultSet rsMain = this.stmt.executeQuery(SQL.sqlMain(this.orderBy))) {
 			while (rsMain.next()) {
 				String channelId = rsMain.getString(1);
 				long subscriberNum = rsMain.getLong(2);
 				long totalViews = rsMain.getLong(3);
 				System.out.printf("%-24s %14d %11d ", channelId, subscriberNum, totalViews);
 
-				try (PreparedStatement psGenreNames = this.conn.prepareStatement(Phase3.sqlGenreNames())) {
+				try (PreparedStatement psGenreNames = this.conn.prepareStatement(SQL.sqlGenreNames())) {
 					psGenreNames.setString(1, channelId);
 					try (ResultSet rsGenreNames = psGenreNames.executeQuery()) {
 						ArrayList<String> genreNames = new ArrayList<>();
@@ -53,7 +57,7 @@ public class PageMain {
 				String channelName = rsMain.getString(4);
 				System.out.printf("%s\n", channelName);
 			}
-			System.out.printf("Order by: %s\n", Phase3.strOrderBy(this.orderBy));
+			System.out.printf("Order by: %s\n", SQL.strOrderBy(this.orderBy));
 			this.conn.commit();
 		} catch (SQLException e) {
 			System.err.println("sql error = " + e.getMessage());
@@ -74,7 +78,8 @@ public class PageMain {
 			this.changeSortMethod();
 			break;
 		case 2:
-			// TODO 채널 ID 입력하여 선택 후 채널 상세 정보
+			Phase3.page = Phase3.PAGE_CHANNEL_INFO;
+			this.selectChannel();
 			break;
 		case 3:
 			Phase3.page = Phase3.PAGE_SEARCH;
@@ -98,30 +103,25 @@ public class PageMain {
 
 		switch (Integer.parseInt(this.sc.nextLine())) {
 		case 1:
-			this.orderBy = Phase3.ORDER_BY_CHANNEL_NAME;
+			this.orderBy = SQL.ORDER_BY_CHANNEL_NAME;
 			break;
 		case 2:
-			this.orderBy = Phase3.ORDER_BY_SUBSCRIBER_NUM;
+			this.orderBy = SQL.ORDER_BY_SUBSCRIBER_NUM;
 			break;
 		case 3:
-			this.orderBy = Phase3.ORDER_BY_TOTAL_VIEWS;
+			this.orderBy = SQL.ORDER_BY_TOTAL_VIEWS;
 			break;
 		default:
 			throw new NumberFormatException();
 		}
 	}
 
-	private String sqlProjection() {
-		StringJoiner sj = new StringJoiner(" ");
-		sj.add("SELECT c.channel_id, c.subscriber_num, c.total_views, c.channel_name");
-		sj.add("  FROM channel c");
-		return sj.toString();
-	}
+	private void selectChannel() {
+		System.out.println();
+		System.out.println("[Select channel]");
+		System.out.print("Enter the channel id: ");
 
-	private String sqlMain() {
-		StringJoiner sj = new StringJoiner(" ");
-		sj.add(this.sqlProjection());
-		sj.add(String.format("ORDER BY %s", Phase3.strOrderBy(this.orderBy)));
-		return sj.toString();
+		this.pageChannelInfo.setPreviousPage(Phase3.PAGE_MAIN);
+		this.pageChannelInfo.setChannelId(this.sc.nextLine());
 	}
 }

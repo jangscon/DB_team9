@@ -3,7 +3,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Scanner;
-import java.util.StringJoiner;
 
 public class Phase3 {
 	public static final String URL = "jdbc:oracle:thin:@localhost:1521:orcl";
@@ -14,10 +13,6 @@ public class Phase3 {
 	public static final int PAGE_SEARCH = 1;
 	public static final int PAGE_SEARCH_RESULT = 2;
 	public static final int PAGE_CHANNEL_INFO = 3;
-
-	public static final int ORDER_BY_CHANNEL_NAME = 0;
-	public static final int ORDER_BY_SUBSCRIBER_NUM = 1;
-	public static final int ORDER_BY_TOTAL_VIEWS = 2;
 
 	public static boolean flag = true;
 	public static int page = 0;
@@ -36,9 +31,12 @@ public class Phase3 {
 			PageMain pageMain = new PageMain(conn, stmt, sc);
 			PageSearch pageSearch = new PageSearch(conn, sc);
 			PageSearchResult pageSearchResult = new PageSearchResult(conn, sc);
+			PageChannelInfo pageChannelInfo = new PageChannelInfo(conn, sc);
 
 			pageMain.setPageSearch(pageSearch);
+			pageMain.setPageChannelInfo(pageChannelInfo);
 			pageSearchResult.setPageSearch(pageSearch);
+			pageSearchResult.setPageChannelInfo(pageChannelInfo);
 			conn.setAutoCommit(false);
 
 			while (flag) {
@@ -56,6 +54,10 @@ public class Phase3 {
 						pageSearchResult.print();
 						pageSearchResult.menu();
 						break;
+					case PAGE_CHANNEL_INFO:
+						pageChannelInfo.print();
+						pageChannelInfo.menu();
+						break;
 					}
 				} catch (NumberFormatException e) {
 					System.err.println("Please enter a valid value.");
@@ -65,30 +67,5 @@ public class Phase3 {
 			System.err.println("sql error = " + e.getMessage());
 			System.exit(1);
 		}
-	}
-
-	// Type 2
-	public static String sqlGenreNames() {
-		StringJoiner sj = new StringJoiner(" ");
-		sj.add("  SELECT g.genre_name");
-		sj.add("    FROM channel c, has h, genre g");
-		sj.add("   WHERE c.channel_id = h.channel_id");
-		sj.add("     AND h.genre_num = g.genre_num");
-		sj.add("     AND c.channel_id = ?");
-		sj.add("ORDER BY g.genre_name");
-		return sj.toString();
-	}
-
-	public static String strOrderBy(int orderBy) {
-		String str = null;
-		switch (orderBy) {
-		case ORDER_BY_CHANNEL_NAME:
-			return "CHANNEL_NAME";
-		case ORDER_BY_SUBSCRIBER_NUM:
-			return "SUBSCRIBER_NUM DESC";
-		case ORDER_BY_TOTAL_VIEWS:
-			return "TOTAL_VIEWS DESC";
-		}
-		return str;
 	}
 }

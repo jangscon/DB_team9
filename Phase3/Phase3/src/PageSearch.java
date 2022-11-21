@@ -2,7 +2,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Scanner;
-import java.util.StringJoiner;
 
 public class PageSearch {
 	private Connection conn;
@@ -177,24 +176,12 @@ public class PageSearch {
 	}
 
 	private PreparedStatement psCond(int orderBy) throws SQLException {
-		StringJoiner sj = new StringJoiner(" ");
-		sj.add(this.sqlProjection());
-		sj.add(String.format("ORDER BY %s", Phase3.strOrderBy(orderBy)));
-
-		PreparedStatement ps = this.conn.prepareStatement(sj.toString());
+		PreparedStatement ps = this.conn.prepareStatement(SQL.sqlSearch(orderBy));
 		return ps;
 	}
 
-	// Type 4
 	private PreparedStatement psCondKW(int orderBy) throws SQLException {
-		StringJoiner sj = new StringJoiner(" ");
-		sj.add(this.sqlProjection());
-		sj.add("AND c.channel_id IN (");
-		sj.add(this.sqlCondKW());
-		sj.add(")");
-		sj.add(String.format("ORDER BY %s", Phase3.strOrderBy(orderBy)));
-
-		PreparedStatement ps = this.conn.prepareStatement(sj.toString());
+		PreparedStatement ps = this.conn.prepareStatement(SQL.sqlSearchKW(orderBy));
 		ps.setString(1, String.format("%%%s%%", this.keywords[0]));
 		ps.setString(3, String.format("%%%s%%", this.keywords[0]));
 		if (this.keywords.length != 1) {
@@ -207,72 +194,29 @@ public class PageSearch {
 		return ps;
 	}
 
-	// Type 6
 	private PreparedStatement psCondSN(int orderBy) throws SQLException {
-		StringJoiner sj = new StringJoiner(" ");
-		sj.add(this.sqlProjection());
-		sj.add("AND c.channel_id IN (");
-		sj.add(this.sqlCondSN());
-		sj.add(")");
-		sj.add(String.format("ORDER BY %s", Phase3.strOrderBy(orderBy)));
-
-		PreparedStatement ps = this.conn.prepareStatement(sj.toString());
+		PreparedStatement ps = this.conn.prepareStatement(SQL.sqlSearchSN(orderBy));
 		ps.setLong(1, this.subscriberNumOver != 0 ? this.subscriberNumOver : -1);
 		ps.setLong(2, this.subscriberNumUnder != 0 ? this.subscriberNumUnder : 99999999);
 		return ps;
 	}
 
-	// Type 7
 	private PreparedStatement psCondTV(int orderBy) throws SQLException {
-		StringJoiner sj = new StringJoiner(" ");
-		sj.add("  WITH id_total_views AS (");
-		sj.add("SELECT c.channel_id");
-		sj.add("  FROM channel c");
-		sj.add(" WHERE c.total_views > ?");
-		sj.add("   AND c.total_views < ?)");
-		sj.add("SELECT c.channel_id, c.subscriber_num, c.total_views, y.name, c.channel_name, c.description");
-		sj.add("  FROM channel c, youtuber y, id_total_views i");
-		sj.add(" WHERE c.youtuber_id = y.youtuber_id");
-		sj.add("   AND c.channel_id = i.channel_id");
-		sj.add(String.format("ORDER BY %s", Phase3.strOrderBy(orderBy)));
-
-		PreparedStatement ps = this.conn.prepareStatement(sj.toString());
+		PreparedStatement ps = this.conn.prepareStatement(SQL.sqlSearchTV(orderBy));
 		ps.setLong(1, this.totalViewsOver != 0 ? this.totalViewsOver : -1);
 		ps.setLong(2, this.totalViewsUnder != 0 ? this.totalViewsUnder : 99999999999L);
 		return ps;
 	}
 
-	// Type 5
 	private PreparedStatement psCondGN(int orderBy) throws SQLException {
-		StringJoiner sj = new StringJoiner(" ");
-		sj.add(this.sqlProjection());
-		sj.add("   AND NOT EXISTS (");
-		sj.add("SELECT g.genre_num");
-		sj.add("  FROM genre g");
-		sj.add(" WHERE g.genre_name in (?, ?)");
-		sj.add(" MINUS");
-		sj.add("SELECT h.genre_num");
-		sj.add("  FROM has h");
-		sj.add(" WHERE c.channel_id = h.channel_id)");
-		sj.add(String.format("ORDER BY %s", Phase3.strOrderBy(orderBy)));
-
-		PreparedStatement ps = this.conn.prepareStatement(sj.toString());
+		PreparedStatement ps = this.conn.prepareStatement(SQL.sqlSearchGN(orderBy));
 		ps.setString(1, this.genreNames[0]);
 		ps.setString(2, this.genreNames.length != 1 ? this.genreNames[1] : this.genreNames[0]);
 		return ps;
 	}
 
 	private PreparedStatement psCondKWSN(int orderBy) throws SQLException {
-		StringJoiner sj = new StringJoiner(" ");
-		sj.add(this.sqlProjection());
-		sj.add("AND c.channel_id IN (");
-		sj.add(this.sqlCondKW());
-		sj.add("INTERSECT");
-		sj.add(this.sqlCondSN());
-		sj.add(")");
-		sj.add(String.format("ORDER BY %s", Phase3.strOrderBy(orderBy)));
-
-		PreparedStatement ps = this.conn.prepareStatement(sj.toString());
+		PreparedStatement ps = this.conn.prepareStatement(SQL.sqlSearchKWSN(orderBy));
 		ps.setString(1, String.format("%%%s%%", this.keywords[0]));
 		ps.setString(3, String.format("%%%s%%", this.keywords[0]));
 		if (this.keywords.length != 1) {
@@ -288,16 +232,7 @@ public class PageSearch {
 	}
 
 	private PreparedStatement psCondKWTV(int orderBy) throws SQLException {
-		StringJoiner sj = new StringJoiner(" ");
-		sj.add(this.sqlProjection());
-		sj.add("AND c.channel_id IN (");
-		sj.add(this.sqlCondKW());
-		sj.add("INTERSECT");
-		sj.add(this.sqlCondTV());
-		sj.add(")");
-		sj.add(String.format("ORDER BY %s", Phase3.strOrderBy(orderBy)));
-
-		PreparedStatement ps = this.conn.prepareStatement(sj.toString());
+		PreparedStatement ps = this.conn.prepareStatement(SQL.sqlSearchKWTV(orderBy));
 		ps.setString(1, String.format("%%%s%%", this.keywords[0]));
 		ps.setString(3, String.format("%%%s%%", this.keywords[0]));
 		if (this.keywords.length != 1) {
@@ -313,16 +248,7 @@ public class PageSearch {
 	}
 
 	private PreparedStatement psCondKWGN(int orderBy) throws SQLException {
-		StringJoiner sj = new StringJoiner(" ");
-		sj.add(this.sqlProjection());
-		sj.add("AND c.channel_id IN (");
-		sj.add(this.sqlCondKW());
-		sj.add("INTERSECT");
-		sj.add(this.sqlCondGN());
-		sj.add(")");
-		sj.add(String.format("ORDER BY %s", Phase3.strOrderBy(orderBy)));
-
-		PreparedStatement ps = this.conn.prepareStatement(sj.toString());
+		PreparedStatement ps = this.conn.prepareStatement(SQL.sqlSearchKWGN(orderBy));
 		ps.setString(1, String.format("%%%s%%", this.keywords[0]));
 		ps.setString(3, String.format("%%%s%%", this.keywords[0]));
 		if (this.keywords.length != 1) {
@@ -338,16 +264,7 @@ public class PageSearch {
 	}
 
 	private PreparedStatement psCondSNTV(int orderBy) throws SQLException {
-		StringJoiner sj = new StringJoiner(" ");
-		sj.add(this.sqlProjection());
-		sj.add("AND c.channel_id IN (");
-		sj.add(this.sqlCondSN());
-		sj.add("INTERSECT");
-		sj.add(this.sqlCondTV());
-		sj.add(")");
-		sj.add(String.format("ORDER BY %s", Phase3.strOrderBy(orderBy)));
-
-		PreparedStatement ps = this.conn.prepareStatement(sj.toString());
+		PreparedStatement ps = this.conn.prepareStatement(SQL.sqlSearchSNTV(orderBy));
 		ps.setLong(1, this.subscriberNumOver != 0 ? this.subscriberNumOver : -1);
 		ps.setLong(2, this.subscriberNumUnder != 0 ? this.subscriberNumUnder : 99999999);
 		ps.setLong(3, this.totalViewsOver != 0 ? this.totalViewsOver : -1);
@@ -356,16 +273,7 @@ public class PageSearch {
 	}
 
 	private PreparedStatement psCondSNGN(int orderBy) throws SQLException {
-		StringJoiner sj = new StringJoiner(" ");
-		sj.add(this.sqlProjection());
-		sj.add("AND c.channel_id IN (");
-		sj.add(this.sqlCondSN());
-		sj.add("INTERSECT");
-		sj.add(this.sqlCondGN());
-		sj.add(")");
-		sj.add(String.format("ORDER BY %s", Phase3.strOrderBy(orderBy)));
-
-		PreparedStatement ps = this.conn.prepareStatement(sj.toString());
+		PreparedStatement ps = this.conn.prepareStatement(SQL.sqlSearchSNGN(orderBy));
 		ps.setLong(1, this.subscriberNumOver != 0 ? this.subscriberNumOver : -1);
 		ps.setLong(2, this.subscriberNumUnder != 0 ? this.subscriberNumUnder : 99999999);
 		ps.setString(3, this.genreNames[0]);
@@ -374,16 +282,7 @@ public class PageSearch {
 	}
 
 	private PreparedStatement psCondTVGN(int orderBy) throws SQLException {
-		StringJoiner sj = new StringJoiner(" ");
-		sj.add(this.sqlProjection());
-		sj.add("AND c.channel_id IN (");
-		sj.add(this.sqlCondTV());
-		sj.add("INTERSECT");
-		sj.add(this.sqlCondGN());
-		sj.add(")");
-		sj.add(String.format("ORDER BY %s", Phase3.strOrderBy(orderBy)));
-
-		PreparedStatement ps = this.conn.prepareStatement(sj.toString());
+		PreparedStatement ps = this.conn.prepareStatement(SQL.sqlSearchTVGN(orderBy));
 		ps.setLong(1, this.totalViewsOver != 0 ? this.totalViewsOver : -1);
 		ps.setLong(2, this.totalViewsUnder != 0 ? this.totalViewsUnder : 99999999999L);
 		ps.setString(3, this.genreNames[0]);
@@ -392,18 +291,7 @@ public class PageSearch {
 	}
 
 	private PreparedStatement psCondKWSNTV(int orderBy) throws SQLException {
-		StringJoiner sj = new StringJoiner(" ");
-		sj.add(this.sqlProjection());
-		sj.add("AND c.channel_id IN (");
-		sj.add(this.sqlCondKW());
-		sj.add("INTERSECT");
-		sj.add(this.sqlCondSN());
-		sj.add("INTERSECT");
-		sj.add(this.sqlCondTV());
-		sj.add(")");
-		sj.add(String.format("ORDER BY %s", Phase3.strOrderBy(orderBy)));
-
-		PreparedStatement ps = this.conn.prepareStatement(sj.toString());
+		PreparedStatement ps = this.conn.prepareStatement(SQL.sqlSearchKWSNTV(orderBy));
 		ps.setString(1, String.format("%%%s%%", this.keywords[0]));
 		ps.setString(3, String.format("%%%s%%", this.keywords[0]));
 		if (this.keywords.length != 1) {
@@ -421,18 +309,7 @@ public class PageSearch {
 	}
 
 	private PreparedStatement psCondKWSNGN(int orderBy) throws SQLException {
-		StringJoiner sj = new StringJoiner(" ");
-		sj.add(this.sqlProjection());
-		sj.add("AND c.channel_id IN (");
-		sj.add(this.sqlCondKW());
-		sj.add("INTERSECT");
-		sj.add(this.sqlCondSN());
-		sj.add("INTERSECT");
-		sj.add(this.sqlCondGN());
-		sj.add(")");
-		sj.add(String.format("ORDER BY %s", Phase3.strOrderBy(orderBy)));
-
-		PreparedStatement ps = this.conn.prepareStatement(sj.toString());
+		PreparedStatement ps = this.conn.prepareStatement(SQL.sqlSearchKWSNGN(orderBy));
 		ps.setString(1, String.format("%%%s%%", this.keywords[0]));
 		ps.setString(3, String.format("%%%s%%", this.keywords[0]));
 		if (this.keywords.length != 1) {
@@ -450,18 +327,7 @@ public class PageSearch {
 	}
 
 	private PreparedStatement psCondKWTVGN(int orderBy) throws SQLException {
-		StringJoiner sj = new StringJoiner(" ");
-		sj.add(this.sqlProjection());
-		sj.add("AND c.channel_id IN (");
-		sj.add(this.sqlCondKW());
-		sj.add("INTERSECT");
-		sj.add(this.sqlCondTV());
-		sj.add("INTERSECT");
-		sj.add(this.sqlCondGN());
-		sj.add(")");
-		sj.add(String.format("ORDER BY %s", Phase3.strOrderBy(orderBy)));
-
-		PreparedStatement ps = this.conn.prepareStatement(sj.toString());
+		PreparedStatement ps = this.conn.prepareStatement(SQL.sqlSearchKWTVGN(orderBy));
 		ps.setString(1, String.format("%%%s%%", this.keywords[0]));
 		ps.setString(3, String.format("%%%s%%", this.keywords[0]));
 		if (this.keywords.length != 1) {
@@ -479,18 +345,7 @@ public class PageSearch {
 	}
 
 	private PreparedStatement psCondSNTVGN(int orderBy) throws SQLException {
-		StringJoiner sj = new StringJoiner(" ");
-		sj.add(this.sqlProjection());
-		sj.add("AND c.channel_id IN (");
-		sj.add(this.sqlCondSN());
-		sj.add("INTERSECT");
-		sj.add(this.sqlCondTV());
-		sj.add("INTERSECT");
-		sj.add(this.sqlCondGN());
-		sj.add(")");
-		sj.add(String.format("ORDER BY %s", Phase3.strOrderBy(orderBy)));
-
-		PreparedStatement ps = this.conn.prepareStatement(sj.toString());
+		PreparedStatement ps = this.conn.prepareStatement(SQL.sqlSearchSNTVGN(orderBy));
 		ps.setLong(1, this.subscriberNumOver != 0 ? this.subscriberNumOver : -1);
 		ps.setLong(2, this.subscriberNumUnder != 0 ? this.subscriberNumUnder : 99999999);
 		ps.setLong(3, this.totalViewsOver != 0 ? this.totalViewsOver : -1);
@@ -500,22 +355,8 @@ public class PageSearch {
 		return ps;
 	}
 
-	// Type 10
 	private PreparedStatement psCondKWSNTVGN(int orderBy) throws SQLException {
-		StringJoiner sj = new StringJoiner(" ");
-		sj.add(this.sqlProjection());
-		sj.add("AND c.channel_id IN (");
-		sj.add(this.sqlCondKW());
-		sj.add("INTERSECT");
-		sj.add(this.sqlCondSN());
-		sj.add("INTERSECT");
-		sj.add(this.sqlCondTV());
-		sj.add("INTERSECT");
-		sj.add(this.sqlCondGN());
-		sj.add(")");
-		sj.add(String.format("ORDER BY %s", Phase3.strOrderBy(orderBy)));
-
-		PreparedStatement ps = this.conn.prepareStatement(sj.toString());
+		PreparedStatement ps = this.conn.prepareStatement(SQL.sqlSearchKWSNTVGN(orderBy));
 		ps.setString(1, String.format("%%%s%%", this.keywords[0]));
 		ps.setString(3, String.format("%%%s%%", this.keywords[0]));
 		if (this.keywords.length != 1) {
@@ -532,59 +373,5 @@ public class PageSearch {
 		ps.setString(9, this.genreNames[0]);
 		ps.setString(10, this.genreNames.length != 1 ? this.genreNames[1] : this.genreNames[0]);
 		return ps;
-	}
-
-	private String sqlProjection() {
-		StringJoiner sj = new StringJoiner(" ");
-		sj.add("SELECT c.channel_id, c.subscriber_num, c.total_views, y.name, c.channel_name, c.description");
-		sj.add("  FROM channel c, youtuber y");
-		sj.add(" WHERE c.youtuber_id = y.youtuber_id");
-		return sj.toString();
-	}
-
-	// Type 1
-	private String sqlCondKW() {
-		StringJoiner sj = new StringJoiner(" ");
-		sj.add("SELECT c.channel_id");
-		sj.add("  FROM channel c");
-		sj.add(" WHERE c.channel_name LIKE ?");
-		sj.add("   AND c.channel_name LIKE ?");
-		sj.add("    OR c.description LIKE ?");
-		sj.add("   AND c.description LIKE ?");
-		return sj.toString();
-	}
-
-	private String sqlCondSN() {
-		StringJoiner sj = new StringJoiner(" ");
-		sj.add("SELECT c.channel_id");
-		sj.add("  FROM channel c");
-		sj.add(" WHERE c.subscriber_num > ?");
-		sj.add("   AND c.subscriber_num < ?");
-		return sj.toString();
-	}
-
-	private String sqlCondTV() {
-		StringJoiner sj = new StringJoiner(" ");
-		sj.add("SELECT c.channel_id");
-		sj.add("  FROM channel c");
-		sj.add(" WHERE c.total_views > ?");
-		sj.add("   AND c.total_views < ?");
-		return sj.toString();
-	}
-
-	private String sqlCondGN() {
-		StringJoiner sj = new StringJoiner(" ");
-		sj.add("   SELECT c.channel_id");
-		sj.add("     FROM channel c, has h, genre g");
-		sj.add("    WHERE c.channel_id = h.channel_id");
-		sj.add("      AND h.genre_num = g.genre_num");
-		sj.add("      AND g.genre_name = ?");
-		sj.add("INTERSECT");
-		sj.add("   SELECT c.channel_id");
-		sj.add("     FROM channel c, has h, genre g");
-		sj.add("    WHERE c.channel_id = h.channel_id");
-		sj.add("      AND h.genre_num = g.genre_num");
-		sj.add("      AND g.genre_name = ?");
-		return sj.toString();
 	}
 }
