@@ -1,13 +1,7 @@
-from flask import Blueprint
+from flask import Blueprint, render_template
 
-bp = Blueprint('main', __name__, url_prefix='/')
+main_bp = Blueprint('main', __name__)
 
-
-@bp.route('/hello')
-def hello_pybo():
-    return 'Hello, Pybo!'
-
-
-@bp.route('/')
-def index():
-    return 'Pybo index'
+@main_bp.route('/')
+def main_page():
+    return render_template('main.html')
