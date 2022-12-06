@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>정보페이지 예시</title>
-
+    <link rel="stylesheet" href="./../static/css/bootstrap.css">
     <style>
           html body {
           /* fallback for old browsers */
@@ -48,13 +48,23 @@
 </head>
 <body>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}">
-  <div class="card text-white bg-dark mb-3" style="max-width: 20rem; margin: auto;">
-        <div class="card-header">Header</div>
+  <div style="margin-top: 50px; margin-bottom: 50px;">
+  <div class="card text-white bg-dark mb-3" style="max-width: 20rem; margin: 10px; margin-right: 0; float:left;">
+        <div class="card-header"></div>
         <div class="card-body">
             <h4 class="card-title">Dark card title</h4>
             <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
         </div>
   </div>
+  <div class="card text-white bg-dark mb-3" style="max-width: 350px; margin: 10px; margin-right: 0; display:inline-block; height: 150px;">
+        <div class="card-header"></div>
+        <div class="card-body">
+            <h4 class="card-title">평점 : </h4>
+            <h4 class="card-title">구독자 수 : 1000000000000</h4>
+            <h4 class="card-title">장르 : </h4>
+        </div>
+  </div>
+
 
   <div style="  position: absolute;left: 50%;transform: translateX(-50%);">
     <div class="starpoint_wrap">
@@ -83,5 +93,6 @@
         </div>
     </div>
   </div>
+</div>
 </body>
 </html>
