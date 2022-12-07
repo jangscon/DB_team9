@@ -84,13 +84,12 @@
             </div>
         </div>
     </nav>
-
     <div class="collapse fixed-top form-collapse" id="collapseExample">
         <div class="card card-body">
-            <form>
+            <form action="searchp.jsp" method="get">
                 <div class="mb-3">
                     <label for="inputKeywords" class="form-label">Keywords</label>
-                    <input type="text" class="form-control" id="inputKeywords" aria-describedby="keywordsHelp">
+                    <input type="text" class="form-control" id="inputKeywords" name="keywords" aria-describedby="keywordsHelp">
                     <div id="keywordsHelp" class="form-text">Separated by spaces. Up to 2. Search keywords from channel
                         name and description.
                     </div>
@@ -99,28 +98,28 @@
                     <label for="subscriberNumOver" class="form-label">Number of subscribers over: <span
                             class="span1">0</span></label>
                     <input type="range" class="form-range" min="0" max="25700000" value="0" step="100000"
-                           id="subscriberNumOver" onchange="range_change('span1', this)">
+                           id="subscriberNumOver" name="subscriberNumOver" onchange="range_change('span1', this)">
                 </div>
                 <div class="mb-3">
                     <label for="subscriberNumUnder" class="form-label">Number of subscribers under: <span class="span2">25700000</span></label>
                     <input type="range" class="form-range" min="0" max="25700000" value="25700000" step="100000"
-                           id="subscriberNumUnder" onchange="range_change('span2', this)">
+                           id="subscriberNumUnder" name="subscriberNumUnder" onchange="range_change('span2', this)">
                 </div>
                 <div class="mb-3">
                     <label for="totalViewsOver" class="form-label">Total views over: <span
                             class="span3">0</span></label>
                     <input type="range" class="form-range" min="0" max="12000000000" value="0" step="10000000"
-                           id="totalViewsOver" onchange="range_change('span3', this)">
+                           id="totalViewsOver" name="totalViewsOver" onchange="range_change('span3', this)">
                 </div>
                 <div class="mb-3">
                     <label for="totalViewsUnder" class="form-label">Total views under: <span
                             class="span4">12000000000</span></label>
                     <input type="range" class="form-range" min="0" max="12000000000" value="12000000000" step="10000000"
-                           id="totalViewsUnder" onchange="range_change('span4', this)">
+                           id="totalViewsUnder" name="totalViewsUnder" onchange="range_change('span4', this)">
                 </div>
                 <div class="mb-3">
                     <label for="inputGenreNames" class="form-label">Genre names</label>
-                    <input type="text" class="form-control" id="inputGenreNames" aria-describedby="genreNamesHelp">
+                    <input type="text" class="form-control" id="inputGenreNames" name="genreNames" aria-describedby="genreNamesHelp">
                     <div id="genreNamesHelp" class="form-text">Separated by spaces. Up to 2.</div>
                 </div>
                 <button type="submit" class="btn btn-primary">Submit</button>
@@ -128,7 +127,6 @@
         </div>
     </div>
 </header>
-
 <main>
     <div class="container-fluid">
         <%
@@ -150,7 +148,6 @@
             } catch (NamingException e) {
                 e.printStackTrace();
             }
-
             try (Connection conn = Objects.requireNonNull(dataSource).getConnection()) {
                 conn.setAutoCommit(false);
 
@@ -168,13 +165,14 @@
                                 if (rs.next()) {
                                     out.println("<div class=\"col\">");
                                     out.println("<div class=\"card shadow-sm\" style=\"margin-bottom: 24px\">");
-                                    out.println(String.format("<img src=\"%s\">", rs.getString(5)));
+                                    out.println(String.format("<img class=\"card-img-top\" src=\"%s\">", rs.getString(5)));
                                     out.println("<div class=\"card-body\">");
                                     out.println(String.format("<p class=\"card-text\">%s</p>", rs.getString(2)));
                                     out.println("<div class=\"d-flex justify-content-between align-items-center\">");
                                     out.println(String.format("<small class=\"text-muted\">%d<br>subscribers</small>", rs.getLong(4)));
                                     out.println(String.format("<small class=\"text-muted\" style=\"text-align: right\">%d<br>time watched</small>", rs.getLong(3)));
                                     out.println("</div>");
+                                    out.println(String.format("<a href=\"channel_info.jsp?id=%s\" class=\"stretched-link\"></a>", rs.getString(1)));
                                     out.println("</div>");
                                     out.println("</div>");
                                     out.println("</div>");
@@ -188,188 +186,8 @@
                 System.err.println("sql error = " + e.getMessage());
             }
         %>
-        <div class="row">
-            <div class="col">
-                <h2 class="mx-3">Animation</h2>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col">
-                <div class="card shadow-sm" style="margin-bottom: 24px">
-                    <img src="%s">
-                    <div class="card-body">
-                        <p class="card-text">채널 이름</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <small class="text-muted">123456<br>subscribers</small>
-                            <small class="text-muted" style="text-align: right">123456<br>time watched</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card shadow-sm" style="margin-bottom: 24px">
-                    <svg class="bd-placeholder-img card-img-top" width="100%" height="150"
-                         xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail"
-                         preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title>
-                        <rect width="100%" height="100%" fill="#55595c"/>
-                        <text x="50%" y="50%" fill="#eceeef" dy=".3em">Thumbnail</text>
-                    </svg>
-                    <div class="card-body">
-                        <p class="card-text">채널 이름</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <small class="text-muted">123456<br>subscribers</small>
-                            <small class="text-muted" style="text-align: right">123456<br>time watched</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card shadow-sm" style="margin-bottom: 24px">
-                    <svg class="bd-placeholder-img card-img-top" width="100%" height="150"
-                         xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail"
-                         preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title>
-                        <rect width="100%" height="100%" fill="#55595c"/>
-                        <text x="50%" y="50%" fill="#eceeef" dy=".3em">Thumbnail</text>
-                    </svg>
-                    <div class="card-body">
-                        <p class="card-text">채널 이름</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <small class="text-muted">123456<br>subscribers</small>
-                            <small class="text-muted" style="text-align: right">123456<br>time watched</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card shadow-sm" style="margin-bottom: 24px">
-                    <svg class="bd-placeholder-img card-img-top" width="100%" height="150"
-                         xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail"
-                         preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title>
-                        <rect width="100%" height="100%" fill="#55595c"/>
-                        <text x="50%" y="50%" fill="#eceeef" dy=".3em">Thumbnail</text>
-                    </svg>
-                    <div class="card-body">
-                        <p class="card-text">채널 이름</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <small class="text-muted">123456<br>subscribers</small>
-                            <small class="text-muted" style="text-align: right">123456<br>time watched</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card shadow-sm" style="margin-bottom: 24px">
-                    <svg class="bd-placeholder-img card-img-top" width="100%" height="150"
-                         xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail"
-                         preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title>
-                        <rect width="100%" height="100%" fill="#55595c"/>
-                        <text x="50%" y="50%" fill="#eceeef" dy=".3em">Thumbnail</text>
-                    </svg>
-                    <div class="card-body">
-                        <p class="card-text">채널 이름</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <small class="text-muted">123456<br>subscribers</small>
-                            <small class="text-muted" style="text-align: right">123456<br>time watched</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col">
-                <h2 class="mx-3">Animation</h2>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col">
-                <div class="card shadow-sm" style="margin-bottom: 24px">
-                    <svg class="bd-placeholder-img card-img-top" width="100%" height="150"
-                         xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail"
-                         preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title>
-                        <rect width="100%" height="100%" fill="#55595c"/>
-                        <text x="50%" y="50%" fill="#eceeef" dy=".3em">Thumbnail</text>
-                    </svg>
-                    <div class="card-body">
-                        <p class="card-text">채널 이름</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <small class="text-muted">123456<br>subscribers</small>
-                            <small class="text-muted" style="text-align: right">123456<br>time watched</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card shadow-sm" style="margin-bottom: 24px">
-                    <svg class="bd-placeholder-img card-img-top" width="100%" height="150"
-                         xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail"
-                         preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title>
-                        <rect width="100%" height="100%" fill="#55595c"/>
-                        <text x="50%" y="50%" fill="#eceeef" dy=".3em">Thumbnail</text>
-                    </svg>
-                    <div class="card-body">
-                        <p class="card-text">채널 이름</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <small class="text-muted">123456<br>subscribers</small>
-                            <small class="text-muted" style="text-align: right">123456<br>time watched</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card shadow-sm" style="margin-bottom: 24px">
-                    <svg class="bd-placeholder-img card-img-top" width="100%" height="150"
-                         xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail"
-                         preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title>
-                        <rect width="100%" height="100%" fill="#55595c"/>
-                        <text x="50%" y="50%" fill="#eceeef" dy=".3em">Thumbnail</text>
-                    </svg>
-                    <div class="card-body">
-                        <p class="card-text">채널 이름</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <small class="text-muted">123456<br>subscribers</small>
-                            <small class="text-muted" style="text-align: right">123456<br>time watched</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card shadow-sm" style="margin-bottom: 24px">
-                    <svg class="bd-placeholder-img card-img-top" width="100%" height="150"
-                         xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail"
-                         preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title>
-                        <rect width="100%" height="100%" fill="#55595c"/>
-                        <text x="50%" y="50%" fill="#eceeef" dy=".3em">Thumbnail</text>
-                    </svg>
-                    <div class="card-body">
-                        <p class="card-text">채널 이름</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <small class="text-muted">123456<br>subscribers</small>
-                            <small class="text-muted" style="text-align: right">123456<br>time watched</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card shadow-sm" style="margin-bottom: 24px">
-                    <svg class="bd-placeholder-img card-img-top" width="100%" height="150"
-                         xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail"
-                         preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title>
-                        <rect width="100%" height="100%" fill="#55595c"/>
-                        <text x="50%" y="50%" fill="#eceeef" dy=".3em">Thumbnail</text>
-                    </svg>
-                    <div class="card-body">
-                        <p class="card-text">채널 이름</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <small class="text-muted">123456<br>subscribers</small>
-                            <small class="text-muted" style="text-align: right">123456<br>time watched</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 </main>
-
 <script>
     function range_change(target, obj) {
         let x = document.getElementsByClassName(target)[0];
