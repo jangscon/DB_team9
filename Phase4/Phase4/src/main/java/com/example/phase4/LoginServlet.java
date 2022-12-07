@@ -27,6 +27,8 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
+        request.setCharacterEncoding("UTF-8");
+
         DataSource dataSource = null;
 
         try {
@@ -52,10 +54,8 @@ public class LoginServlet extends HttpServlet {
                         session.setAttribute("username", rs.getString(1));
                         session.setAttribute("nickname", rs.getString(2));
                         response.sendRedirect("index.jsp");
-                        System.out.println("Success");
                     } else {
                         response.sendRedirect("login.jsp");
-                        System.out.println("fail");
                     }
                 }
             }
