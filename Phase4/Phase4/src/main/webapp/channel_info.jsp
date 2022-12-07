@@ -67,6 +67,82 @@
             text-shadow: 0 0 0 #a00; /* 마우스 클릭 체크 */
         }
 
+
+        #form-commentInfo{
+		    width: 100%;
+		}
+
+		#comment-count{
+		    margin-bottom: 10px;
+		}
+
+		#comment-input{
+
+
+		    width: 50%;
+		    height: 200px;
+		    textAlignVertical: top;
+
+		}
+
+		#submit{
+		    background-color: rgb(0, 128,255);
+		    width: 5.5em;
+		    height: 3.3em;;
+		    font-size: 15px;
+		    font-weight: bold;
+		    color: aliceblue;
+		}
+
+		#voteUp, #voteDown{
+		    width: 3.5em;
+		    height: 1.9em;
+		    background-color: aqua;
+		}
+
+		#comments{
+		    margin-top: 10px;
+		}
+
+		.eachComment{
+		    width :50%;
+		    margin: 10px;
+		    padding: 0.5em;
+		    border-bottom: 1px solid #c1bcba;
+		}
+
+		.eachComment .name{
+		    font-size: 1.5em;
+		    font-weight: bold;
+		    margin-bottom: 0.3em;
+		    display: flex;
+		    justify-content: space-between;
+		}
+
+		.eachComment .inputValue{
+		    font-size: 1.2em;
+		    font-style: italic;
+		}
+
+		.eachComment .time{
+		    font-size: 0.7em;
+		    color: #c1bcba;
+		    font-style: oblique;
+		    margin-top: 0.5em;
+		    margin-bottom: 0.5em;
+
+		}
+
+		.eachComment .voteDiv{
+		    display: flex;
+		    justify-content: flex-end;
+		}
+
+		.eachComment .deleteComment{
+		    background-color: red;
+		    color: aliceblue;
+		}
+
     </style>
 </head>
 <body>
@@ -77,12 +153,12 @@
 	String portNum;
 	String user;
 	String pass;
-	
+
 	BufferedReader reader = null;
 	try{
 		String filePath = application.getRealPath("config.txt");
 	    reader = new BufferedReader(new FileReader(filePath));
-	
+
 	    serverIP = reader.readLine();
 		strSID = reader.readLine();
 		portNum = reader.readLine();
@@ -90,36 +166,36 @@
 		pass = reader.readLine();
         out.println(serverIP + "<br/>");
 
-	   
+
 		reader.close();
 	}finally{try{
 	 	reader.close();
 	 }catch(Exception e){}}
 
 %>
-<!-- 디비 접속 --> 
+<!-- 디비 접속 -->
 <%
 		String url = "jdbc:oracle:thin:@"+serverIP+":"+portNum+":"+strSID+"?allowMultiQueries=true";
-		
-		
+
+
 		Connection conn = null;
 		PreparedStatement pstmt;
 		ResultSet rs;
 		Class.forName("oracle.jdbc.driver.OracleDriver");
 		conn = DriverManager.getConnection(url, user, pass);
-		
-		// 테스트용 쿼리 
-		
+
+		// 테스트용 쿼리
+
 		String query_yt = "SELECT c.channel_id, c.channel_name, c.total_views, c.subscriber_num ,c.youtuber_id, y.name, AVG(r.rating), c.thumbnail, c.description " +
 					"FROM channel c, rating r, youtuber y " +
 					"WHERE c.channel_id = r.channel_id " +
-					"AND c.youtuber_id = y.youtuber_id " + 
-							
-					"AND c.subscriber_num > 3000000 " + 
-					/*  
-					
-					여기서 검색할 조건 입력 AND로 
-					
+					"AND c.youtuber_id = y.youtuber_id " +
+
+					"AND c.subscriber_num > 3000000 " +
+					/*
+
+					여기서 검색할 조건 입력 AND로
+
 					*/
 					"GROUP BY c.channel_id, c.channel_name, c.total_views, c.subscriber_num, c.youtuber_id , y.name, c.thumbnail, c.description ";
 
@@ -225,22 +301,22 @@
 </header>
 
 <%
-        
-        /* 
-        CHANNEL_ID               
-        CHANNEL_NAME                             
-        DESCRIPTION                                                                                                                                                                                                                                                                                                                                                                                                      
-        TOTAL_VIEWS 
-        SUBSCRIBER_NUM 
-        YOUTUBER_ID 
+
+        /*
+        CHANNEL_ID
+        CHANNEL_NAME
+        DESCRIPTION
+        TOTAL_VIEWS
+        SUBSCRIBER_NUM
+        YOUTUBER_ID
         */
 
-        
-        
+
+
         ResultSetMetaData rsmd = rs.getMetaData();
 		int cnt = rsmd.getColumnCount();
         int numcnt = 1;
-        
+
         String chname ;
         String chID;
         long scrnum;
@@ -250,36 +326,39 @@
         float rating;
         String thumbnail;
         String description;
-        
+
         rs.next();
-        
+
 		chID = rs.getString(1);
 		chname = rs.getString(2);
 		totalview = rs.getLong(3);
 		scrnum = rs.getLong(4);
 		ytid = rs.getInt(5);
-		ytname = rs.getString(6); 
+		ytname = rs.getString(6);
 		rating = rs.getFloat(7);
-		thumbnail = rs.getString(8); 
+		thumbnail = rs.getString(8);
 		description = rs.getString(9);
-		
-		
+
+
 %>
 
 <main>
     <div class="container-fluid">
         <div class="row">
-            <div class="col">
+            <div class="col" style="margin-left: 100px; margin-right: 100px">
+
                 <div class="card shadow-sm" style="margin-bottom: 24px">
-                	<%
-                    	out.println("<img style=\" width=100px; height=100px \" src=\""+ thumbnail +"\"> ");
-                    %>
+                	<div class="col">
+	                	<%
+	                    	out.println("<img src=\""+ thumbnail +"\" style=\" width=50%; height=50% \"> ");
+	                    %>
+                   	</div>
                     <div class="card-body">
-                    
+
 	                    <%
 	                    	out.println("<p class=\"card-text h3\">" + chname + "</p>");
 	                    %>
-                    
+
                         <form name="myform" id="myform" method="post" action="./save" style="margin: 0 10px 0 10px">
                             <fieldset>
                                 <input type="radio" name="rating" value="5" id="rate1"><label for="rate1">⭐</label>
@@ -325,7 +404,7 @@
                             <div class="text-muted">
                                 <ul class="info_li">
                                     <li class="bold_name">출연진 : </li>
-                                    
+
                                 </ul>
                             </div>
                         </div>
@@ -365,6 +444,16 @@
                     </div>
                 </div>
             </div>
+
+            <div id="row">
+            	<div class="card mb-3" style="padding: 20px; margin-left: 10px;">
+            		<div style="float: right;">
+				        <div class="h3" id="comment-count">댓글작성</div>
+				        <input id="comment-input" placeholder="댓글을 입력해 주세요.">
+				        <button id="submit">등록</button>
+			       </div>
+		        </div>
+    		</div>
         </div>
     </div>
 </main>
@@ -374,4 +463,3 @@
         crossorigin="anonymous"></script>
 </body>
 </html>
-
