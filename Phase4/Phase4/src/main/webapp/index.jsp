@@ -32,6 +32,11 @@
 <body>
 <%!
     String select;
+    String[] genreNames = {"Animation", "Beauty", "Makeup", "Comedy", "Critics", "Review", "DIY", "Education", "Fashion", "Muckbang", "Cooking", "Gaming", "Health", "Fitness", "Music", "News", "Podcaster", "Sports", "Technology", "Vlogger", "Science", "Dance"};
+    String channelName = "SELECT c.channel_id, c.channel_name, c.total_views, c.subscriber_num, c.thumbnail FROM channel c, has h, genre g WHERE c.channel_id = h.channel_id AND h.genre_num = g.genre_num AND g.genre_name = ? ORDER BY channel_name";
+    String subscriberNum = "SELECT c.channel_id, c.channel_name, c.total_views, c.subscriber_num, c.thumbnail FROM channel c, has h, genre g WHERE c.channel_id = h.channel_id AND h.genre_num = g.genre_num AND g.genre_name = ? ORDER BY subscriber_num DESC";
+    String totalViews = "SELECT c.channel_id, c.channel_name, c.total_views, c.subscriber_num, c.thumbnail FROM channel c, has h, genre g WHERE c.channel_id = h.channel_id AND h.genre_num = g.genre_num AND g.genre_name = ? ORDER BY total_views DESC";
+    String sql = null;
 %>
 <header>
     <nav class="navbar navbar-expand-md fixed-top bg-white flex-column border-bottom">
@@ -126,54 +131,63 @@
 
 <main>
     <div class="container-fluid">
-<%--        <%--%>
-<%--            DataSource dataSource = null;--%>
+        <%
+            switch (select) {
+                case "1":
+                    sql = channelName;
+                    break;
+                case "2":
+                    sql = subscriberNum;
+                    break;
+                case "3":
+                    sql = totalViews;
+                    break;
+            }
+            DataSource dataSource = null;
+            try {
+                Context context = new InitialContext();
+                dataSource = (DataSource) context.lookup("java:comp/env/jdbc/oracle19c");
+            } catch (NamingException e) {
+                e.printStackTrace();
+            }
 
-<%--            try {--%>
-<%--                Context context = new InitialContext();--%>
-<%--                dataSource = (DataSource) context.lookup("java:comp/env/jdbc/oracle19c");--%>
-<%--            } catch (NamingException e) {--%>
-<%--                e.printStackTrace();--%>
-<%--            }--%>
+            try (Connection conn = Objects.requireNonNull(dataSource).getConnection()) {
+                conn.setAutoCommit(false);
 
-<%--            try (Connection conn = Objects.requireNonNull(dataSource).getConnection()) {--%>
-<%--                conn.setAutoCommit(false);--%>
-<%--                String sql = "SELECT c.customer_id, c.nickname FROM customer c WHERE c.customer_id = ? AND c.password = ?";--%>
-<%--                try (PreparedStatement ps = conn.prepareStatement(sql)) {--%>
-<%--                    String username = request.getParameter("username");--%>
-<%--                    String password = request.getParameter("password");--%>
-<%--                    System.out.println(username);--%>
-<%--                    System.out.println(password);--%>
-<%--                    ps.setString(1, request.getParameter("username"));--%>
-<%--                    ps.setString(2, request.getParameter("password"));--%>
-<%--                    try (ResultSet rs = ps.executeQuery()) {--%>
-<%--                        if (rs.next()) {--%>
-<%--                            HttpSession session = request.getSession();--%>
-<%--                            session.setAttribute("username", rs.getString(1));--%>
-<%--                            session.setAttribute("nickname", rs.getString(2));--%>
-<%--                            response.sendRedirect("index.jsp");--%>
-<%--                        } else {--%>
-<%--                            response.sendRedirect("login.jsp");--%>
-<%--                        }--%>
-<%--                    }--%>
-<%--                }--%>
-<%--            } catch (SQLException e) {--%>
-<%--                System.err.println("sql error = " + e.getMessage());--%>
-<%--            }--%>
-
-<%--            String[] genreNames = {"Animation", "Beauty", "Makeup", "Comedy", "Critics", "Review", "DIY", "Education", "Fashion", "Muckbang", "Cooking", "Gaming", "Health", "Fitness", "Music", "News", "Podcaster", "Sports", "Technology", "Vlogger", "Science", "Dance"};--%>
-<%--            for (int i = 0; i < genreNames.length; i++) {--%>
-<%--                out.println("<div class=\"row\">");--%>
-<%--                out.println("<div class=\"col\">");--%>
-<%--                out.println(String.format("<h2 class=\"mx-3\">%s</h2>", genreNames[i]));--%>
-<%--                out.println("</div>");--%>
-<%--                out.println("</div>");--%>
-<%--                out.println("<div class=\"row\">");--%>
-<%--                out.println("<div class=\"col\">");--%>
-<%--                out.println("<div class=\"card shadow-sm\" style=\"margin-bottom: 24px\">");--%>
-
-<%--            }--%>
-<%--        %>--%>
+                for (int i = 0; i < genreNames.length; i++) {
+                    out.println("<div class=\"row\">");
+                    out.println("<div class=\"col\">");
+                    out.println(String.format("<h2 class=\"mx-3\">%s</h2>", genreNames[i]));
+                    out.println("</div>");
+                    out.println("</div>");
+                    out.println("<div class=\"row\">");
+                    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                        ps.setString(1, genreNames[i]);
+                        try (ResultSet rs = ps.executeQuery()) {
+                            for (int j = 0; j < 5; j++) {
+                                if (rs.next()) {
+                                    out.println("<div class=\"col\">");
+                                    out.println("<div class=\"card shadow-sm\" style=\"margin-bottom: 24px\">");
+                                    out.println(String.format("<img src=\"%s\">", rs.getString(5)));
+                                    out.println("<div class=\"card-body\">");
+                                    out.println(String.format("<p class=\"card-text\">%s</p>", rs.getString(2)));
+                                    out.println("<div class=\"d-flex justify-content-between align-items-center\">");
+                                    out.println(String.format("<small class=\"text-muted\">%d<br>subscribers</small>", rs.getLong(4)));
+                                    out.println(String.format("<small class=\"text-muted\" style=\"text-align: right\">%d<br>time watched</small>", rs.getLong(3)));
+                                    out.println("</div>");
+                                    out.println("</div>");
+                                    out.println("</div>");
+                                    out.println("</div>");
+                                }
+                            }
+                        }
+                    }
+                    out.println("</div>");
+                }
+            } catch (SQLException e) {
+                System.err.println("sql error = " + e.getMessage());
+            }
+        %>
         <div class="row">
             <div class="col">
                 <h2 class="mx-3">Animation</h2>
@@ -182,7 +196,7 @@
         <div class="row">
             <div class="col">
                 <div class="card shadow-sm" style="margin-bottom: 24px">
-                    <img src="https://yt3.ggpht.com/ikoBSvkW5k5z9Att2kLh02ALcjN-uNM17GUf-kwW4tNZNZ9EClXFnCuGQHu4ZRK5GkRN571K3w=s240-c-k-c0x00ffffff-no-rj">
+                    <img src="%s">
                     <div class="card-body">
                         <p class="card-text">채널 이름</p>
                         <div class="d-flex justify-content-between align-items-center">
