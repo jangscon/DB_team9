@@ -27,7 +27,7 @@
         <div class="container-fluid">
             <a class="navbar-brand" href="#">TUBE FINDER</a>
             <div class="d-flex">
-                <button type="button" class="btn btn-outline-primary me-2">Login</button>
+                <button type="button" class="btn btn-outline-primary me-2" onclick="location.href='login.jsp'">Login</button>
                 <button type="button" class="btn btn-primary">Sign-up</button>
             </div>
         </div>

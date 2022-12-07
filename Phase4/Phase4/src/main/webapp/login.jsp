@@ -98,17 +98,17 @@
 <body class="text-center">
 
 <main class="form-signin w-100 m-auto">
-    <form>
+    <form action="LoginServlet" method="post">
         <img class="mb-1" src="images/logo.svg" alt="" width="300">
         <h1 class="h3 mb-3 fw-normal">Please sign in</h1>
 
         <div class="form-floating">
-            <input type="text" class="form-control" id="floatingInput" placeholder="Username">
-            <label for="floatingInput">Username</label>
+            <input type="text" class="form-control" id="username" placeholder="Username">
+            <label for="username">Username</label>
         </div>
         <div class="form-floating">
-            <input type="password" class="form-control" id="floatingPassword" placeholder="Password">
-            <label for="floatingPassword">Password</label>
+            <input type="password" class="form-control" id="password" placeholder="Password">
+            <label for="password">Password</label>
         </div>
 
         <div class="checkbox mb-3">
@@ -120,7 +120,5 @@
         <p class="mt-5 mb-3 text-muted">&copy; 2017–2022</p>
     </form>
 </main>
-
-
 </body>
 </html>
