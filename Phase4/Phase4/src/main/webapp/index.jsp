@@ -1,3 +1,12 @@
+<%@ page import="javax.sql.DataSource" %>
+<%@ page import="javax.naming.Context" %>
+<%@ page import="javax.naming.InitialContext" %>
+<%@ page import="javax.naming.NamingException" %>
+<%@ page import="java.sql.Connection" %>
+<%@ page import="java.util.Objects" %>
+<%@ page import="java.sql.PreparedStatement" %>
+<%@ page import="java.sql.ResultSet" %>
+<%@ page import="java.sql.SQLException" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <!doctype html>
 <html lang="en">
@@ -21,13 +30,16 @@
     </style>
 </head>
 <body>
-
+<%!
+    String select;
+%>
 <header>
     <nav class="navbar navbar-expand-md fixed-top bg-white flex-column border-bottom">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">TUBE FINDER</a>
             <div class="d-flex">
-                <button type="button" class="btn btn-outline-primary me-2" onclick="location.href='login.jsp'">Login</button>
+                <button type="button" class="btn btn-outline-primary me-2" onclick="location.href='login.jsp'">Login
+                </button>
                 <button type="button" class="btn btn-primary">Sign-up</button>
             </div>
         </div>
@@ -39,11 +51,31 @@
             </button>
             <div class="d-flex align-items-center">
                 <label style="white-space: nowrap">Order by:</label>
-                <select class="form-select ms-2" id="exampleSelect1">
-                    <option value="1" selected>Channel name</option>
-                    <option value="2">Number of subscribers</option>
-                    <option value="3">Total views</option>
-                </select>
+                <form method="get">
+                    <select class="form-select ms-2" id="exampleSelect1" name="select" onchange="this.form.submit()">
+                        <%
+                            select = request.getParameter("select");
+                            select = select != null ? select : "1";
+                            switch (select) {
+                                case "1":
+                                    out.println("<option value=\"1\" selected>Channel name</option>");
+                                    out.println("<option value=\"2\">Number of subscribers</option>");
+                                    out.println("<option value=\"3\">Total views</option>");
+                                    break;
+                                case "2":
+                                    out.println("<option value=\"1\">Channel name</option>");
+                                    out.println("<option value=\"2\" selected>Number of subscribers</option>");
+                                    out.println("<option value=\"3\">Total views</option>");
+                                    break;
+                                case "3":
+                                    out.println("<option value=\"1\">Channel name</option>");
+                                    out.println("<option value=\"2\">Number of subscribers</option>");
+                                    out.println("<option value=\"3\" selected>Total views</option>");
+                                    break;
+                            }
+                        %>
+                    </select>
+                </form>
             </div>
         </div>
     </nav>
@@ -94,6 +126,54 @@
 
 <main>
     <div class="container-fluid">
+<%--        <%--%>
+<%--            DataSource dataSource = null;--%>
+
+<%--            try {--%>
+<%--                Context context = new InitialContext();--%>
+<%--                dataSource = (DataSource) context.lookup("java:comp/env/jdbc/oracle19c");--%>
+<%--            } catch (NamingException e) {--%>
+<%--                e.printStackTrace();--%>
+<%--            }--%>
+
+<%--            try (Connection conn = Objects.requireNonNull(dataSource).getConnection()) {--%>
+<%--                conn.setAutoCommit(false);--%>
+<%--                String sql = "SELECT c.customer_id, c.nickname FROM customer c WHERE c.customer_id = ? AND c.password = ?";--%>
+<%--                try (PreparedStatement ps = conn.prepareStatement(sql)) {--%>
+<%--                    String username = request.getParameter("username");--%>
+<%--                    String password = request.getParameter("password");--%>
+<%--                    System.out.println(username);--%>
+<%--                    System.out.println(password);--%>
+<%--                    ps.setString(1, request.getParameter("username"));--%>
+<%--                    ps.setString(2, request.getParameter("password"));--%>
+<%--                    try (ResultSet rs = ps.executeQuery()) {--%>
+<%--                        if (rs.next()) {--%>
+<%--                            HttpSession session = request.getSession();--%>
+<%--                            session.setAttribute("username", rs.getString(1));--%>
+<%--                            session.setAttribute("nickname", rs.getString(2));--%>
+<%--                            response.sendRedirect("index.jsp");--%>
+<%--                        } else {--%>
+<%--                            response.sendRedirect("login.jsp");--%>
+<%--                        }--%>
+<%--                    }--%>
+<%--                }--%>
+<%--            } catch (SQLException e) {--%>
+<%--                System.err.println("sql error = " + e.getMessage());--%>
+<%--            }--%>
+
+<%--            String[] genreNames = {"Animation", "Beauty", "Makeup", "Comedy", "Critics", "Review", "DIY", "Education", "Fashion", "Muckbang", "Cooking", "Gaming", "Health", "Fitness", "Music", "News", "Podcaster", "Sports", "Technology", "Vlogger", "Science", "Dance"};--%>
+<%--            for (int i = 0; i < genreNames.length; i++) {--%>
+<%--                out.println("<div class=\"row\">");--%>
+<%--                out.println("<div class=\"col\">");--%>
+<%--                out.println(String.format("<h2 class=\"mx-3\">%s</h2>", genreNames[i]));--%>
+<%--                out.println("</div>");--%>
+<%--                out.println("</div>");--%>
+<%--                out.println("<div class=\"row\">");--%>
+<%--                out.println("<div class=\"col\">");--%>
+<%--                out.println("<div class=\"card shadow-sm\" style=\"margin-bottom: 24px\">");--%>
+
+<%--            }--%>
+<%--        %>--%>
         <div class="row">
             <div class="col">
                 <h2 class="mx-3">Animation</h2>
