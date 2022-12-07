@@ -48,39 +48,6 @@
     long totalViewsOver;
     long totalViewsUnder;
     String genreNames[];
-%>
-<%
-    inputKeywords = request.getParameter("keywords");
-    inputSubscriberNumOver = request.getParameter("subscriberNumOver");
-    inputSubscriberNumUnder = request.getParameter("subscriberNumUnder");
-    inputTotalViewsOver = request.getParameter("totalViewsOver");
-    inputTotalViewsUnder = request.getParameter("totalViewsUnder");
-    inputGenreNames = request.getParameter("genreNames");
-    keywords = inputKeywords != null ? inputKeywords.split(" ") : new String[]{""};
-    subscriberNumOver = inputSubscriberNumOver != null ? Long.parseLong(inputSubscriberNumOver) : 0;
-    subscriberNumUnder = inputSubscriberNumUnder != null ? Long.parseLong(inputSubscriberNumUnder) : 25700000;
-    totalViewsOver = inputTotalViewsOver != null ? Long.parseLong(inputTotalViewsOver) : 0;
-    totalViewsUnder = inputTotalViewsUnder != null ? Long.parseLong(inputTotalViewsUnder) : 12000000000L;
-    genreNames = inputGenreNames != null ? inputGenreNames.split(" ") : new String[]{""};
-%>
-<%
-    Connection conn = null;
-    PreparedStatement ps;
-    ResultSet rs;
-
-    DataSource dataSource = null;
-    try {
-        Context context = new InitialContext();
-        dataSource = (DataSource) context.lookup("java:comp/env/jdbc/oracle19c");
-    } catch (NamingException e) {
-        e.printStackTrace();
-    }
-    try {
-        conn = Objects.requireNonNull(dataSource).getConnection();
-    } catch (SQLException e) {
-        throw new RuntimeException(e);
-    }
-
     String query_yt = "SELECT c.channel_id, c.channel_name, c.total_views, c.subscriber_num ,c.youtuber_id, y.name, AVG(r.rating), c.thumbnail " +
             "FROM channel c, rating r, youtuber y " +
             "WHERE c.channel_id = r.channel_id " +
@@ -115,39 +82,20 @@
             "      AND h.genre_num = g.genre_num\n" +
             "      AND g.genre_name LIKE ?)" +
             "GROUP BY c.channel_id, c.channel_name, c.total_views, c.subscriber_num, c.youtuber_id , y.name, c.thumbnail ";
-
-    ps = conn.prepareStatement(query_yt);
-
-    if (this.keywords[0].isEmpty()) {
-        ps.setString(1, "%%");
-        ps.setString(2, "%%");
-        ps.setString(3, "%%");
-        ps.setString(4, "%%");
-    } else {
-        ps.setString(1, String.format("%%%s%%", this.keywords[0]));
-        ps.setString(3, String.format("%%%s%%", this.keywords[0]));
-        if (this.keywords.length != 1) {
-            ps.setString(2, String.format("%%%s%%", this.keywords[1]));
-            ps.setString(4, String.format("%%%s%%", this.keywords[1]));
-        } else {
-            ps.setString(2, "%%");
-            ps.setString(4, "%%");
-        }
-    }
-    ps.setLong(5, this.subscriberNumOver);
-    ps.setLong(6, this.subscriberNumUnder);
-    ps.setLong(7, this.totalViewsOver);
-    ps.setLong(8, this.totalViewsUnder);
-    if (this.genreNames[0].isEmpty()) {
-        ps.setString(9, "%%");
-        ps.setString(10, "%%");
-    } else {
-        ps.setString(9, String.format("%%%s%%", this.genreNames[0]));
-        ps.setString(9, this.genreNames[0]);
-        ps.setString(10, this.genreNames.length != 1 ? String.format("%%%s%%", this.genreNames[1]) : String.format("%%%s%%", this.genreNames[0]));
-    }
-
-    rs = ps.executeQuery();
+%>
+<%
+    inputKeywords = request.getParameter("keywords");
+    inputSubscriberNumOver = request.getParameter("subscriberNumOver");
+    inputSubscriberNumUnder = request.getParameter("subscriberNumUnder");
+    inputTotalViewsOver = request.getParameter("totalViewsOver");
+    inputTotalViewsUnder = request.getParameter("totalViewsUnder");
+    inputGenreNames = request.getParameter("genreNames");
+    keywords = inputKeywords != null ? inputKeywords.split(" ") : new String[]{""};
+    subscriberNumOver = inputSubscriberNumOver != null ? Long.parseLong(inputSubscriberNumOver) : 0;
+    subscriberNumUnder = inputSubscriberNumUnder != null ? Long.parseLong(inputSubscriberNumUnder) : 25700000;
+    totalViewsOver = inputTotalViewsOver != null ? Long.parseLong(inputTotalViewsOver) : 0;
+    totalViewsUnder = inputTotalViewsUnder != null ? Long.parseLong(inputTotalViewsUnder) : 12000000000L;
+    genreNames = inputGenreNames != null ? inputGenreNames.split(" ") : new String[]{""};
 %>
 
 <header>
@@ -256,101 +204,130 @@
             </div>
         </div>
         <%
-
-            /*
-            CHANNEL_ID
-            CHANNEL_NAME
-            DESCRIPTION
-            TOTAL_VIEWS
-            SUBSCRIBER_NUM
-            YOUTUBER_ID
-            */
-
-            ResultSet rs_yt;
-
-            ResultSetMetaData rsmd = rs.getMetaData();
-            int cnt = rsmd.getColumnCount();
-            int numcnt = 1;
-
-            String chname;
-            String chID;
-            long scrnum;
-            long totalview;
-            int ytid;
-            String ytname;
-            float rating;
-            String thumbnail;
-
-            while (rs.next()) {
-
-                chID = rs.getString(1);
-                chname = rs.getString(2);
-                totalview = rs.getLong(3);
-                scrnum = rs.getLong(4);
-                ytid = rs.getInt(5);
-                ytname = rs.getString(6);
-                rating = rs.getFloat(7);
-                thumbnail = rs.getString(8);
-
-
-                if ((numcnt - 1) % 4 == 0) {
-                    out.println("<div class=\"row\">");
-                }
-                out.println(
-                        "<div class=\"col\"> " +
-                                "<div class=\"card\"> " +
-                                "<div class=\"card-horizontal\"> " +
-                                "<div class=\"img-square-wrapper\"> " +
-                                "<img src=\"" + thumbnail + "\"> " +
-                                "<title>Placeholder</title> " +
-                                "<rect width=\"100%\" height=\"100%\" fill=\"#55595c\"/> " +
-                                "</div> " +
-                                "<div class=\"card-body\"> " +
-                                "<p class=\"card-text h4\">" + chname + "</p> " +
-                                "<div> " +
-                                "<div class=\"d-flex justify-content-between align-items-center\"> " +
-                                "<div class=\"text-muted h5\"> " +
-                                "<span class=\"bold_name\">평점 : </span> " +
-                                "<span>" + String.format("%.2f", rating) + "/ 10</span> " +
-                                "</div> " +
-                                "</div> " +
-                                "<div class=\"d-flex justify-content-between align-items-center\"> " +
-                                "<div class=\"text-muted h5\"> " +
-                                "<span class=\"bold_name\">구독자수 : </span> " +
-                                "<span>" + scrnum + "</span> " +
-                                "</div> " +
-                                "</div> " +
-                                "<div class=\"d-flex justify-content-between align-items-center\"> " +
-                                "<div class=\"text-muted h5\"> " +
-                                "<span class=\"bold_name\">조회수 : </span> " +
-                                "<span>" + totalview + "</span> " +
-                                "</div> " +
-                                "</div> " +
-                                "<div class=\"d-flex justify-content-between align-items-center\"> " +
-                                "<div class=\"text-muted h5\"> " +
-                                "<span class=\"bold_name\">유튜버 : </span> " +
-                                "<span>" + ytname + "</span> " +
-                                "</div> " +
-                                "</div> " +
-                                "</div> " +
-                                "</div> " +
-                                "</div> " +
-                                "<div class=\"card-footer\"> " +
-                                "<small class=\"text-muted\"><A href = \"http://www.youtube.com/channel/" + chID + "\")>" + chname + " 체널 바로가기</A></small> " +
-                                "</div> " +
-                                "</div> " +
-                                "</div> ");
-
-                if ((numcnt - 1) % 4 == 0) {
-                    out.println("</div>");
-                }
-
-                numcnt += 1;
+            DataSource dataSource = null;
+            try {
+                Context context = new InitialContext();
+                dataSource = (DataSource) context.lookup("java:comp/env/jdbc/oracle19c");
+            } catch (NamingException e) {
+                e.printStackTrace();
             }
+            try (Connection conn = Objects.requireNonNull(dataSource).getConnection()) {
+                conn.setAutoCommit(false);
+                try (PreparedStatement ps = conn.prepareStatement(query_yt)) {
+                    if (this.keywords[0].isEmpty()) {
+                        ps.setString(1, "%%");
+                        ps.setString(2, "%%");
+                        ps.setString(3, "%%");
+                        ps.setString(4, "%%");
+                    } else {
+                        ps.setString(1, String.format("%%%s%%", this.keywords[0]));
+                        ps.setString(3, String.format("%%%s%%", this.keywords[0]));
+                        if (this.keywords.length != 1) {
+                            ps.setString(2, String.format("%%%s%%", this.keywords[1]));
+                            ps.setString(4, String.format("%%%s%%", this.keywords[1]));
+                        } else {
+                            ps.setString(2, "%%");
+                            ps.setString(4, "%%");
+                        }
+                    }
+                    ps.setLong(5, this.subscriberNumOver);
+                    ps.setLong(6, this.subscriberNumUnder);
+                    ps.setLong(7, this.totalViewsOver);
+                    ps.setLong(8, this.totalViewsUnder);
+                    if (this.genreNames[0].isEmpty()) {
+                        ps.setString(9, "%%");
+                        ps.setString(10, "%%");
+                    } else {
+                        ps.setString(9, String.format("%%%s%%", this.genreNames[0]));
+                        ps.setString(9, this.genreNames[0]);
+                        ps.setString(10, this.genreNames.length != 1 ? String.format("%%%s%%", this.genreNames[1]) : String.format("%%%s%%", this.genreNames[0]));
+                    }
+                    try (ResultSet rs = ps.executeQuery()) {
+                        ResultSetMetaData rsmd = rs.getMetaData();
+                        int cnt = rsmd.getColumnCount();
+                        int numcnt = 1;
+
+                        String chname;
+                        String chID;
+                        long scrnum;
+                        long totalview;
+                        int ytid;
+                        String ytname;
+                        float rating;
+                        String thumbnail;
+
+                        while (rs.next()) {
+
+                            chID = rs.getString(1);
+                            chname = rs.getString(2);
+                            totalview = rs.getLong(3);
+                            scrnum = rs.getLong(4);
+                            ytid = rs.getInt(5);
+                            ytname = rs.getString(6);
+                            rating = rs.getFloat(7);
+                            thumbnail = rs.getString(8);
 
 
+                            if ((numcnt - 1) % 4 == 0) {
+                                out.println("<div class=\"row\">");
+                            }
+                            out.println(
+                                    "<div class=\"col\"> " +
+                                            "<div class=\"card\"> " +
+                                            "<div class=\"card-horizontal\"> " +
+                                            "<div class=\"img-square-wrapper\"> " +
+                                            "<img src=\"" + thumbnail + "\"> " +
+                                            "<title>Placeholder</title> " +
+                                            "<rect width=\"100%\" height=\"100%\" fill=\"#55595c\"/> " +
+                                            "</div> " +
+                                            "<div class=\"card-body\"> " +
+                                            "<p class=\"card-text h4\">" + chname + "</p> " +
+                                            "<div> " +
+                                            "<div class=\"d-flex justify-content-between align-items-center\"> " +
+                                            "<div class=\"text-muted h5\"> " +
+                                            "<span class=\"bold_name\">평점 : </span> " +
+                                            "<span>" + String.format("%.2f", rating) + "/ 10</span> " +
+                                            "</div> " +
+                                            "</div> " +
+                                            "<div class=\"d-flex justify-content-between align-items-center\"> " +
+                                            "<div class=\"text-muted h5\"> " +
+                                            "<span class=\"bold_name\">구독자수 : </span> " +
+                                            "<span>" + scrnum + "</span> " +
+                                            "</div> " +
+                                            "</div> " +
+                                            "<div class=\"d-flex justify-content-between align-items-center\"> " +
+                                            "<div class=\"text-muted h5\"> " +
+                                            "<span class=\"bold_name\">조회수 : </span> " +
+                                            "<span>" + totalview + "</span> " +
+                                            "</div> " +
+                                            "</div> " +
+                                            "<div class=\"d-flex justify-content-between align-items-center\"> " +
+                                            "<div class=\"text-muted h5\"> " +
+                                            "<span class=\"bold_name\">유튜버 : </span> " +
+                                            "<span>" + ytname + "</span> " +
+                                            "</div> " +
+                                            "</div> " +
+                                            "</div> " +
+                                            "</div> " +
+                                            "</div> " +
+                                            "<div class=\"card-footer\"> " +
+                                            "<small class=\"text-muted\"><A href = \"http://www.youtube.com/channel/" + chID + "\")>" + chname + " 체널 바로가기</A></small> " +
+                                            "</div> " +
+                                            "</div> " +
+                                            "</div> ");
+
+                            if ((numcnt - 1) % 4 == 0) {
+                                out.println("</div>");
+                            }
+
+                            numcnt += 1;
+                        }
+                    }
+                }
+            } catch (SQLException e) {
+                System.err.println("sql error = " + e.getMessage());
+            }
         %>
-
     </div>
 </main>
 
