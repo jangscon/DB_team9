@@ -43,9 +43,15 @@
         <div class="container-fluid">
             <a class="navbar-brand" href="#">TUBE FINDER</a>
             <div class="d-flex">
-                <button type="button" class="btn btn-outline-primary me-2" onclick="location.href='login.jsp'">Login
-                </button>
-                <button type="button" class="btn btn-primary">Sign-up</button>
+                <%
+                    if (session.getAttribute("nickname") != null) {
+                        out.println("<label><b>Welcome!</b> " + session.getAttribute("nickname") + "</label>");
+                    } else {
+                        out.println("<button type=\"button\" class=\"btn btn-outline-primary me-2\" onclick=\"location.href='login.jsp'\">Login");
+                        out.println("</button>");
+                        out.println("<button type=\"button\" class=\"btn btn-primary\">Sign-up</button>");
+                    }
+                %>
             </div>
         </div>
         <div class="container-fluid flex-row mt-3">
@@ -89,7 +95,8 @@
             <form action="searchp.jsp" method="get">
                 <div class="mb-3">
                     <label for="inputKeywords" class="form-label">Keywords</label>
-                    <input type="text" class="form-control" id="inputKeywords" name="keywords" aria-describedby="keywordsHelp">
+                    <input type="text" class="form-control" id="inputKeywords" name="keywords"
+                           aria-describedby="keywordsHelp">
                     <div id="keywordsHelp" class="form-text">Separated by spaces. Up to 2. Search keywords from channel
                         name and description.
                     </div>
@@ -119,7 +126,8 @@
                 </div>
                 <div class="mb-3">
                     <label for="inputGenreNames" class="form-label">Genre names</label>
-                    <input type="text" class="form-control" id="inputGenreNames" name="genreNames" aria-describedby="genreNamesHelp">
+                    <input type="text" class="form-control" id="inputGenreNames" name="genreNames"
+                           aria-describedby="genreNamesHelp">
                     <div id="genreNamesHelp" class="form-text">Separated by spaces. Up to 2.</div>
                 </div>
                 <button type="submit" class="btn btn-primary">Submit</button>
