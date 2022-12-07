@@ -1,6 +1,12 @@
 <!doctype html>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page language="java" import="java.text.*, java.sql.*" %>
+<%@ page import="java.io.BufferedReader"%>
+<%@ page import="java.io.FileReader"%>
+<%@page import="java.io.IOException"%>
+
+
+
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
@@ -26,13 +32,32 @@
     </style>
 </head>
 <body>
+<%
+	String serverIP;
+	String strSID;
+	String portNum;
+	String user;
+	String pass;
+	
+	BufferedReader reader = null;
+	try{
+		String filePath = application.getRealPath("config.txt");
+	    reader = new BufferedReader(new FileReader(filePath));
+	
+	    serverIP = reader.readLine();
+		strSID = reader.readLine();
+		portNum = reader.readLine();
+		user = reader.readLine();
+		pass = reader.readLine();
+	   
+		reader.close();
+	}finally{try{
+	 	reader.close();
+	 }catch(Exception e){}}
+
+%>
 <!-- 디비 접속 --> 
 <%
-		String serverIP = "localhost";
-		String strSID = "xe";
-		String portNum = "1600";
-		String user = "phase4";
-		String pass = "phase4";
 		String url = "jdbc:oracle:thin:@"+serverIP+":"+portNum+":"+strSID;
 		
 		
@@ -206,10 +231,6 @@
 			thumbnail = rs.getString(8); 
 			
 			
-
-			pstmt = conn.prepareStatement(query_yt);
-			
-			rs_yt = pstmt.executeQuery();
 			
 			if ((numcnt-1)%4 == 0) {
 				out.println("<div class=\"row\">");	
