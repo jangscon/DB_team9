@@ -101,41 +101,39 @@
 <header>
     <nav class="navbar navbar-expand-md fixed-top bg-white flex-column border-bottom">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">Fixed navbar</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
-                    aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarCollapse">
-                <ul class="navbar-nav me-auto mb-2 mb-md-0">
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="#">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Link</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link disabled">Disabled</a>
-                    </li>
-                </ul>
-                <div class="d-flex">
-                    <button type="button" class="btn btn-outline-primary me-2">Login</button>
-                    <button type="button" class="btn btn-primary">Sign-up</button>
-                </div>
+            <a class="navbar-brand" href="#">TUBE FINDER</a>
+            <div class="d-flex">
+                <%
+                    if (session.getAttribute("nickname") != null) {
+                        out.println("<label><b>Welcome!</b> " + session.getAttribute("nickname") + "</label>");
+                    } else {
+                        out.println("<button type=\"button\" class=\"btn btn-outline-primary me-2\" onclick=\"location.href='login.jsp'\">Login");
+                        out.println("</button>");
+                        out.println("<button type=\"button\" class=\"btn btn-primary\">Sign-up</button>");
+                    }
+                %>
             </div>
         </div>
         <div class="container-fluid flex-row mt-3">
-            <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample"
-                    aria-expanded="false" aria-controls="collapseExample">
-                Button with data-bs-target
-            </button>
-            <div>
-                <select class="form-select" id="exampleSelect1">
-                    <option selected>Open this select menu</option>
-                    <option value="1">One</option>
-                    <option value="2">Two</option>
-                    <option value="3">Three</option>
-                </select>
+            <fieldset disabled>
+                <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#collapseExample"
+                        aria-expanded="false" aria-controls="collapseExample">
+                    Search channel
+                </button>
+            </fieldset>
+            <div class="d-flex align-items-center">
+                <label style="white-space: nowrap">Order by:</label>
+                <form method="get">
+                    <fieldset disabled>
+                        <select class="form-select ms-2" id="exampleSelect1" name="select"
+                                onchange="this.form.submit()">
+                            <option value="1" selected>Channel name</option>
+                            <option value="2">Number of subscribers</option>
+                            <option value="3">Total views</option>
+                        </select>
+                    </fieldset>
+                </form>
             </div>
         </div>
     </nav>
